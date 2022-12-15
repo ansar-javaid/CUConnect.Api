@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CUConnect.Api.Migrations
 {
-    [DbContext(typeof(CUConnectDBContext))]
+    [DbContext(typeof(IdentityContext))]
     [Migration("20221208153011_step1")]
     partial class step1
     {

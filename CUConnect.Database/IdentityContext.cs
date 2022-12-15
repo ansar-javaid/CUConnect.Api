@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace CUConnect.Database
 {
-    public class CUConnectDBContext : IdentityDbContext<AppUser> 
+    public class IdentityContext : IdentityDbContext<AppUser> 
     {
-        public CUConnectDBContext(DbContextOptions<CUConnectDBContext> options) : base(options)
+        public IdentityContext(DbContextOptions<IdentityContext> options) : base(options)
         {
 
         }
 
-        public CUConnectDBContext()
+        public IdentityContext()
         {
         }
 

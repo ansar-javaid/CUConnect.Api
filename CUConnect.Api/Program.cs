@@ -1,4 +1,5 @@
 using CUConnect.Database;
+using CUConnect.Database.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,13 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 //Sql Dependency Injection
+builder.Services.AddDbContext<IdentityContext>(
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CUConnect.Api")));
 builder.Services.AddDbContext<CUConnectDBContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CUConnect.Api")));
-builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<CUConnectDBContext>();
+builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(options =>
