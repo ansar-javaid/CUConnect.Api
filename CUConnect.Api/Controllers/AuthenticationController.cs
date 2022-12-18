@@ -1,4 +1,5 @@
 ﻿using CUConnect.Database;
+using CUConnect.Database.Entities;
 using CUConnect.Models;
 using CUConnect.Models.RequestModels;
 using Microsoft.AspNetCore.Authorization;
@@ -80,10 +81,13 @@ namespace CUConnect.Api.Controllers
         //JWT Token
         private string CreatToken(AppUser user, IList<Claim> claim)
         {
+            var profileID = FindProfile(user.Id);
+            
             List<Claim> claims = new List<Claim>();
 
             claims.Add(new Claim(ClaimTypes.Email, user.UserName));
             claims.Add(new Claim(ClaimTypes.Name, user.FirstName));
+            claims.Add(new Claim(ClaimTypes.UserData, profileID.ToString()));
             foreach(var claimItem in claim)
                 claims.Add(new Claim(ClaimTypes.Role, claimItem.Value));
 
@@ -99,8 +103,15 @@ namespace CUConnect.Api.Controllers
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
             return jwt;
         }
-
-
+        //--------------------------------------------------------------------------------------------------------------------------------------
+        private int FindProfile(string userID)
+        {
+            using(var _dbContext=new CUConnectDBContext())
+            {
+                var profile=_dbContext.Profiles.Where(x=>x.UserId.Equals(userID)).FirstOrDefault();
+                return profile != null ? profile.ProfileId : -1;
+            }
+        }
         //---------------------------------------------------------------------------------------------------------------------------------------
 
         [HttpPost,Route("changePassword")]
