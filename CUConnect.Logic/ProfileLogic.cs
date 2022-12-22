@@ -102,5 +102,30 @@ namespace CUConnect.Logic
             }
             return StatusCode(StatusCodes.Status404NotFound);
         }
+
+        public async Task<List<ProfileViewRES>> GetProfileWithPosts(int profileId)
+        {
+            using(var _dbContext=new CUConnectDBContext())
+            {
+                //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
+                return await (from x in _dbContext.Profiles
+                        where (x.ProfileId == profileId)
+                        join y in _dbContext.Posts
+                        on x.ProfileId equals y.ProfileId
+                        select new ProfileViewRES
+                        {
+                            ProfileID = x.ProfileId,
+                            ProfileTitle = x.Title,
+                            ProfileDescription = x.Description,
+                            ProfileCreatedOn = x.CreatedOn,
+
+
+                            PostID = y.PostId,
+                            PostDescription = y.Description,
+                            PostsCreatedOn = y.PostedOn,
+
+                        }).ToListAsync();
+            }
+        }
     }
 }

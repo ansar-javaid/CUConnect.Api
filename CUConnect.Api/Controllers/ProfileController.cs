@@ -17,7 +17,7 @@ namespace CUConnect.Api.Controllers
 
     [Route("api/profile")]
     [ApiController]
-    [Authorize(Roles = nameof(Roles.User))]
+   // [Authorize(Roles = nameof(Roles.User))]
     public class ProfileController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
@@ -34,6 +34,14 @@ namespace CUConnect.Api.Controllers
         {
            return Ok(new { Database= _logic.GetAllDepartment()});
         }
+
+        [HttpGet, Route("GetProfile")]
+        public async Task<IActionResult> GetProfileById(int id)
+        {
+            var result = await _logic.GetProfileWithPosts(id);
+            return Ok(new { Database = result !=null ? result : null });
+        }
+
 
         [HttpPost,Route("CreatDepartment")]
         public IActionResult CreatDepartments([FromBody] DepartmentView department)

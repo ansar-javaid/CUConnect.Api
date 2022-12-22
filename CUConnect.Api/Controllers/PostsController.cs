@@ -18,13 +18,14 @@ namespace CUConnect.Api.Controllers
         [HttpGet,Route("GetAllPosts")]
         public IActionResult GetAllPosts()
         {
-            return Ok(_postsLogic.GetAllPosts());
+            return Ok(new { Data = _postsLogic.GetAllPosts() });
         }
 
         [HttpPost,Route("CreatePost")]
-        public IActionResult CreatePost([FromBody] PostsView postsView)
+        public async Task<IActionResult> CreatePost([FromBody] PostsView postsView)
         {
-            return Ok(_postsLogic.CreatPost(postsView));
+            var result =await _postsLogic.CreatPost(postsView);
+            return Ok(result);
         }
     }
 }
