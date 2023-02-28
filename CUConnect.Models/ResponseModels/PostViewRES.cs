@@ -1,0 +1,35 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CUConnect.Models.ResponseModels
+{
+    public class PostViewRES
+    {
+        public int ProfileID { get; set; }
+
+        public string? ProfileTitle { get; set; }
+
+
+
+
+        public int PostID { get; set; }
+
+        public string? PostDescription { get; set; }
+
+        public DateTime? PostsCreatedOn { get; set; }
+
+        public List<Files>? FilePath { get; set; }
+
+
+
+        public class Files
+        {
+            public string? Path { get; set; }
+        }
+
+
+    }
+}

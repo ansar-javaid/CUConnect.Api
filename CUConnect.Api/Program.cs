@@ -5,23 +5,45 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 //Sql Dependency Injection
+#region Database Contexts
 builder.Services.AddDbContext<IdentityContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CUConnect.Api")));
 builder.Services.AddDbContext<CUConnectDBContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CUConnect.Api")));
 builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
+#endregion
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-builder.Services.AddSwaggerGen();
 
+#region Swager UI
+builder.Services.AddSwaggerGen(swagger =>
+{
+    swagger.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "CU Connect API's",
+        Description = $"API's Documentaion with Swagger \r\n\r\n © Copyright {DateTime.Now.Year}. All rights reserved."
+    });
+    #region XMl Documentation  
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    swagger.IncludeXmlComments(xmlPath);
+    #endregion
+}); 
+#endregion
+
+
+#region COROS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("EnableCORS", builder =>
@@ -31,10 +53,12 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod();
     });
 });
+#endregion
 
 builder.Services.AddHealthChecks();
 
 //JWT Configuration
+#region JWT Authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,7 +78,7 @@ builder.Services.AddAuthentication(options =>
                     IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JsonWebTokenKeys:IssuerSigningKey"]))
                 };
             });
-
+#endregion
 
 var app = builder.Build();
 
@@ -69,6 +93,7 @@ app.UseHttpsRedirection();
 app.UseCors("EnableCORS");
 
 app.UseRouting();
+app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();

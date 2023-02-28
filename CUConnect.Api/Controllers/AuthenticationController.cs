@@ -72,7 +72,7 @@ namespace CUConnect.Api.Controllers
             {
                IList<Claim> claim=await _userManager.GetClaimsAsync(userResult);
                 string token = CreatToken(userResult,claim);
-                return Ok(token);
+                return Ok(new { Data = token });
             }
             return Unauthorized();
         }

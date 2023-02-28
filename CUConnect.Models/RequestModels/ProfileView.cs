@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -14,15 +15,18 @@ namespace CUConnect.Models.RequestModels
         [EmailAddress]
         public string Email { get; set; } 
 
-        public int? Department { get; set; }=null;
+        public int? DepartmentId { get; set; }=null;
 
-        public int? Class { get; set; } = null;
+        public int? ClassId { get; set; } = null;
 
         [Required]
         public string Title { get; set; }
 
         [Required]
         public string Description { get; set; }
+
+        [Required]
+        public IFormFile File { get; set; }
 
 
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -14,5 +15,8 @@ namespace CUConnect.Models.RequestModels
 
         [Required]
         public string Description { get; set; }
+
+        [DataType(DataType.Upload)]
+        public List<IFormFile>? Files { get; set; }
     }
 }
