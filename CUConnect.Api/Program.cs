@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -56,6 +57,7 @@ builder.Services.AddCors(options =>
 #endregion
 
 builder.Services.AddHealthChecks();
+builder.Services.AddDirectoryBrowser();
 
 //JWT Configuration
 #region JWT Authentication
@@ -93,7 +95,12 @@ app.UseHttpsRedirection();
 app.UseCors("EnableCORS");
 
 app.UseRouting();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Resourses", "Document")),
+    RequestPath = "/files"
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

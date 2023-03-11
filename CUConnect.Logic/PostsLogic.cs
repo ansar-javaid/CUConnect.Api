@@ -102,7 +102,7 @@ namespace CUConnect.Logic
         {
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
-            var host = $"{request.Scheme}://{request.Host}";
+            var host = $"{request.Scheme}://{request.Host}/files/";
             using (var _dbContext = new CUConnectDBContext())
             {
                 //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
@@ -117,7 +117,7 @@ namespace CUConnect.Logic
                          PostsCreatedOn=z.PostedOn,
                          FilePath=z.Documents.Select(x=> new PostViewRES.Files()
                          {
-                             Path=host+x.Path
+                             Path=host+x.Name
                          }).ToList()
                          
                      }).ToListAsync();
