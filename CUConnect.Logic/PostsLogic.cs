@@ -60,7 +60,7 @@ namespace CUConnect.Logic
                 _dbContext.Posts.Add(post);
                 await _dbContext.SaveChangesAsync();
                 var result = await _fileUploadLogic.Upload(postsView.Files, post);
-                return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles=result.totalfiles, Size=result.size });
+                return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles=result.totalFiles, Size=result.size });
             }
         }
 

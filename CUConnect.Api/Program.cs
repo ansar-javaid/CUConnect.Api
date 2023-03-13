@@ -98,7 +98,7 @@ app.UseRouting();
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Resourses", "Document")),
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Resources", "Document")),
     RequestPath = "/files"
 });
 
