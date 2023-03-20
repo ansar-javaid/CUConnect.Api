@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CUConnect.Database;
 using CUConnect.Database.Entities;
+using CUConnect.Models;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using System.Security.Claims;
 using CUConnectDBContext = CUConnect.Database.Entities.CUConnectDBContext;
 using Profile = CUConnect.Database.Entities.Profile;
 
@@ -17,13 +19,14 @@ namespace CUConnect.Logic
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly FileUploadLogic _fileUploadLogic;
+        private readonly RoleManager<IdentityRole> _roleManager;
         public ProfileLogic(UserManager<AppUser> userManager, IHostEnvironment environment)
         {
             _userManager = userManager;
             _fileUploadLogic = new FileUploadLogic(environment);
         }
 
-
+        #region All Departments
         public async Task<IEnumerable<Department>> GetAllDepartment()
         {
 
@@ -33,7 +36,11 @@ namespace CUConnect.Logic
                 return result;
             }
         }
+        #endregion
 
+
+
+        #region Create Department
         public async Task<IActionResult> CreatDepartment(DepartmentView view)
         {
             using (var _dbContext = new CUConnectDBContext())
@@ -47,19 +54,24 @@ namespace CUConnect.Logic
                 return Ok();
             }
         }
+        #endregion
 
 
+        #region Create Profile
         public async Task<IActionResult> CreatProfile(ProfileView profileView)
         {
             var user = await _userManager.FindByEmailAsync(profileView.Email);
-            if (user != null )
+            if (user != null)
             {
-                if (profileView.File.Length>0)
+                if (profileView.File.Length > 0)
                 {
                     using (var _dbContext = new CUConnectDBContext())
                     {
-                        //If DepartementID and ClassID both are 0 then its an Adminstrative Profile
-                        if (profileView.DepartmentId == 0 && profileView.ClassId == 0 && profileView.Email != null)
+                        var profieResult = _dbContext.Profiles.Where(x => x.UserId.Equals(user.Id)).FirstOrDefault();
+                        if(profieResult != null)
+                            return StatusCode(StatusCodes.Status400BadRequest, new { Status = "One user can have only one profile", Profile=profieResult.Title });
+                        //If DepartementID and ClassID both are null then its an Adminstrative Profile
+                        if (profileView.DepartmentId == null && profileView.ClassId == null && profileView.Email != null)
                         {
                             var profile = new Profile()
                             {
@@ -70,11 +82,13 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
+                            await MakeAdmin(user);
                             var result = await _fileUploadLogic.Upload(profileView.File, profile);
-                            return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Admin", Uploaded=result.status });
+                            return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Admin", Uploaded = result.status });
                         }
 
-                        else if (profileView.DepartmentId != 0 && profileView.Email != null)
+                        //If DepartementID is not null and ClassID is null then its an Departmental Profile
+                        else if (profileView.DepartmentId != null && profileView.ClassId == null && profileView.Email != null)
                         {
                             var profile = new Profile()
                             {
@@ -86,11 +100,13 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
+                            await MakeAdmin(user);
                             var result = await _fileUploadLogic.Upload(profileView.File, profile);
                             return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Department", Uploaded = result.status });
                         }
 
-                        else if (profileView.DepartmentId != 0 && profileView.ClassId != 0 && profileView.Email != null)
+                        //If DepartementID is  null and ClassID is not null then its an Cr. Profile
+                        else if (profileView.DepartmentId ==null && profileView.ClassId != null && profileView.Email != null)
                         {
                             var profile = new Profile()
                             {
@@ -103,6 +119,7 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
+                             await MakeAdmin(user);
                             return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Cr" });
                         }
 
@@ -110,8 +127,11 @@ namespace CUConnect.Logic
                 }
                 return StatusCode(StatusCodes.Status400BadRequest, new { Status = "Please Select Profile Image!" });
             }
-            return StatusCode(StatusCodes.Status404NotFound, new { Status="Registered User Email Not Found!" });
+            return StatusCode(StatusCodes.Status404NotFound, new { Status = "Registered User Email Not Found!" });
         }
+        #endregion
+
+
 
         public async Task<List<PostViewRES>> GetProfileWithPosts(int profileId)
         {
@@ -153,6 +173,25 @@ namespace CUConnect.Logic
             }
         }
         //---------------------------------------------------------------------------------------------------------------------------
-        
+
+        private async Task MakeAdmin(AppUser user)
+        {
+            // Remove the existing claim from the user
+            var existingClaims = await _userManager.GetClaimsAsync(user);
+            if (existingClaims != null && existingClaims.Count > 0)
+            {
+                foreach (var claim in existingClaims)
+                {
+                    if (claim.Type == ClaimTypes.Role && claim.Value == Roles.User.ToString())
+                    {
+                        await _userManager.RemoveClaimAsync(user, claim);
+                    }
+                }
+            }
+
+            // Add a new claim to the user
+            await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, Roles.Admin.ToString()));
+        }
+
     }
 }

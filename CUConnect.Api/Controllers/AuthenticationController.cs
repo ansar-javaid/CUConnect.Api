@@ -34,10 +34,13 @@ namespace CUConnect.Api.Controllers
         [HttpPost,Route("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserView request)
         {
+            // Check if a user with the same email already exists in the system.
             var IsExist = await _userManager.FindByEmailAsync(request.Email);
             if (IsExist != null)
+                // If a user with the same email already exists, return a 500 Internal Server Error with an error message.
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User already exists!" });
 
+            // If a user with the same email does not exist, create a new AppUser object with the input request properties.
             var appUser = new AppUser()
             {
                 Email = request.Email,
@@ -47,19 +50,28 @@ namespace CUConnect.Api.Controllers
                 Gender = request.Gender,
             };
 
+            // Create the new user in the system using the injected UserManager object.
             var userResult = await _userManager.CreateAsync(appUser, request.Password);
             if (!userResult.Succeeded)
+                // If user creation fails, return a 500 Internal Server Error with an error message.
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+
+            // Check if the "User" role exists in the system using the injected RoleManager object.
             if (!await _roleManager.RoleExistsAsync(Roles.User.ToString()))
+                // If the "User" role does not exist, create a new role with the name "User".
                 await _roleManager.CreateAsync(new IdentityRole(Roles.User.ToString()));
+
+            // If the "User" role exists or was just created, add it to the newly created user.
             if (await _roleManager.RoleExistsAsync(Roles.User.ToString()))
             {
                 await _userManager.AddToRoleAsync(appUser, Roles.User.ToString());
+                // Add a claim to the user indicating that they belong to the "User" role.
                 await _userManager.AddClaimAsync(appUser, new Claim(ClaimTypes.Role, Roles.User.ToString()));
             }
 
             return Ok(new { Status = "Success", Message = "User created successfully!" });
         }
+
 
 
         //---------------------------------------------------------------------------------------------------------------------------------------
