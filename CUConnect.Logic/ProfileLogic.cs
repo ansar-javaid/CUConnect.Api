@@ -19,7 +19,6 @@ namespace CUConnect.Logic
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly FileUploadLogic _fileUploadLogic;
-        private readonly RoleManager<IdentityRole> _roleManager;
         public ProfileLogic(UserManager<AppUser> userManager, IHostEnvironment environment)
         {
             _userManager = userManager;
