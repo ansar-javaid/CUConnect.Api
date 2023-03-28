@@ -13,5 +13,7 @@ namespace CUConnect.Models.ResponseModels
         public string? ProfileTitle { get; set; }
 
         public string? ProfileDescription { get; set; }
+
+        public string? Path { get; set; }
     }
 }

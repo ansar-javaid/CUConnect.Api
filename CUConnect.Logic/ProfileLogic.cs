@@ -67,8 +67,8 @@ namespace CUConnect.Logic
                     using (var _dbContext = new CUConnectDBContext())
                     {
                         var profieResult = _dbContext.Profiles.Where(x => x.UserId.Equals(user.Id)).FirstOrDefault();
-                        if(profieResult != null)
-                            return StatusCode(StatusCodes.Status400BadRequest, new { Status = "One user can have only one profile", Profile=profieResult.Title });
+                        if (profieResult != null)
+                            return StatusCode(StatusCodes.Status400BadRequest, new { Status = "One user can have only one profile", Profile = profieResult.Title });
                         //If DepartementID and ClassID both are null then its an Adminstrative Profile
                         if (profileView.DepartmentId == null && profileView.ClassId == null && profileView.Email != null)
                         {
@@ -105,7 +105,7 @@ namespace CUConnect.Logic
                         }
 
                         //If DepartementID is  null and ClassID is not null then its an Cr. Profile
-                        else if (profileView.DepartmentId ==null && profileView.ClassId != null && profileView.Email != null)
+                        else if (profileView.DepartmentId == null && profileView.ClassId != null && profileView.Email != null)
                         {
                             var profile = new Profile()
                             {
@@ -118,7 +118,7 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
-                             await MakeAdmin(user);
+                            await MakeAdmin(user);
                             return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Cr" });
                         }
 
@@ -157,6 +157,9 @@ namespace CUConnect.Logic
 
         public async Task<ProfileOnlyViewRES> GetProfileOnly(int profileId)
         {
+            IHttpContextAccessor httpContext = new HttpContextAccessor();
+            var request = httpContext.HttpContext.Request;
+            var host = $"{request.Scheme}://{request.Host}/files/";
             using (var _dbContext = new CUConnectDBContext())
             {
                 return await (from x in _dbContext.Profiles
@@ -167,6 +170,7 @@ namespace CUConnect.Logic
                                   ProfileID = x.ProfileId,
                                   ProfileTitle = x.Title,
                                   ProfileDescription = x.Description,
+                                  Path = host + x.Documents.FirstOrDefault().Name // Include the related Document entity
                               }).FirstOrDefaultAsync();
 
             }
