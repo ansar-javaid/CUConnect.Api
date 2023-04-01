@@ -8,6 +8,7 @@ namespace CUConnect.Models
 {
     public enum Roles
     {
+        Supper=0,
         Admin = 1,
         User = 2,
     }

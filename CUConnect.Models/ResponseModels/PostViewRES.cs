@@ -12,6 +12,13 @@ namespace CUConnect.Models.ResponseModels
 
         public string? ProfileTitle { get; set; }
 
+        public Cover? CoverPicture { get; set; }
+
+        public class Cover
+        {
+            public string? ProfileImage { get; set; }
+        }
+
 
 
 

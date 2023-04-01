@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static CUConnect.Models.ResponseModels.PostViewRES;
 
 namespace CUConnect.Logic
 {
@@ -113,6 +114,10 @@ namespace CUConnect.Logic
                      {
                          ProfileID = y.profiles.ProfileId,
                          ProfileTitle = y.profiles.Title,
+                         CoverPicture = y.profiles.Documents
+                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
+                                         .Select(doc => new Cover() { ProfileImage = doc.Name })
+                                         .FirstOrDefault(),
 
                          PostID = z.PostId,
                          PostDescription = z.Description,
