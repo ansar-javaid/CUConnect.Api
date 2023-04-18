@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using CUConnect.Database;
+﻿using CUConnect.Database;
 using CUConnect.Database.Entities;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
@@ -7,12 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static CUConnect.Models.ResponseModels.PostViewRES;
 
 namespace CUConnect.Logic
@@ -116,7 +109,7 @@ namespace CUConnect.Logic
                          ProfileTitle = y.profiles.Title,
                          CoverPicture = y.profiles.Documents
                                          .Where(doc => doc.ProfileId.Equals(z.ProfileId))
-                                         .Select(doc => new Cover() { ProfileImage = doc.Name })
+                                         .Select(doc => new Cover() { ProfileImage = host + doc.Name })
                                          .FirstOrDefault(),
 
                          PostID = z.PostId,
@@ -127,7 +120,8 @@ namespace CUConnect.Logic
                              Path = host + x.Name
                          }).ToList()
 
-                     }).ToListAsync();
+                     }).OrderByDescending(p => p.PostsCreatedOn) // Order by PostsCreatedOn property in descending order
+                       .ToListAsync();
                 return profile;
             }
         }

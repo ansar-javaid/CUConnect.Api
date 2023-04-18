@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using CUConnect.Database;
+﻿using CUConnect.Database;
 using CUConnect.Database.Entities;
 using CUConnect.Models;
 using CUConnect.Models.RequestModels;
@@ -130,6 +129,41 @@ namespace CUConnect.Logic
         }
         #endregion
 
+        public async Task<List<RegisteredUsersViewRES>> GetRegisteredUsers()
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+
+                return await _dbContext.AspNetUsers
+                                        .Include(u => u.AspNetUserClaims)
+                                        .Where(u => u.AspNetUserClaims.Any(c => c.ClaimValue.Equals(nameof(Roles.User)))) //for User
+                                        .Select(u => new RegisteredUsersViewRES
+                                        {
+                                            Email = u.Email,
+                                            FirstName = u.FirstName,
+                                            LastName = u.LastName,
+                                            JoinedOn = u.UserJoined,
+                                            UserRole = u.AspNetUserClaims.FirstOrDefault(c => c.ClaimValue.Equals(nameof(Roles.User))).ClaimValue //for User
+                                        })
+                                        .ToListAsync();
+            }
+
+
+            //return await (from user in _dbContext.AspNetUsers
+            //             join claim in _dbContext.AspNetUserClaims
+            //             on user.Id equals claim.UserId
+            //             on user.Id equals claim.UserId
+            //             where claim.ClaimValue.Equals(nameof(Roles.User))
+            //             select new RegisteredUsersViewRES
+            //             {
+            //                 Email = user.Email,
+            //                 FirstName = user.FirstName,
+            //                 LastName = user.LastName,
+            //                 JoinedOn = user.UserJoined,
+            //                 UserRole = claim.ClaimValue
+            //             }).ToListAsync();
+
+        }
 
 
         public async Task<List<PostViewRES>> GetProfileWithPosts(int profileId)

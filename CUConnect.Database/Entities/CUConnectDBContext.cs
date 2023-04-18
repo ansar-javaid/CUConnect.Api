@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
@@ -31,7 +28,7 @@ namespace CUConnect.Database.Entities
         public virtual DbSet<Reaction> Reactions { get; set; } = null!;
         public virtual DbSet<Subscription> Subscriptions { get; set; } = null!;
 
- 
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,7 +1,6 @@
 ﻿using CUConnect.Logic;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CUConnect.Api.Controllers
@@ -27,7 +26,7 @@ namespace CUConnect.Api.Controllers
         /// Get All Posts: everything
         /// </summary>
         /// <returns></returns>
-        [HttpGet,Route("GetAllPosts")]
+        [HttpGet, Route("GetAllPosts")]
         public IActionResult GetAllPosts()
         {
             return Ok(new { Data = _postsLogic.GetAllPosts() });
@@ -39,10 +38,10 @@ namespace CUConnect.Api.Controllers
         /// <param name="postsView"></param>
         /// <returns></returns>
 
-        [HttpPost,Route("CreatePost")]
+        [HttpPost, Route("CreatePost")]
         public async Task<IActionResult> CreatePost([FromForm] PostsView postsView)
         {
-            var result =await _postsLogic.CreatPost(postsView);
+            var result = await _postsLogic.CreatPost(postsView);
             return Ok(result);
         }
 

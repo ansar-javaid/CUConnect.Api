@@ -2,7 +2,6 @@
 using CUConnect.Logic;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -45,17 +44,17 @@ namespace CUConnect.Api.Controllers
         [HttpGet, Route("ProfileStatus")]
         public async Task<IActionResult> ProfileStatus([FromQuery][EmailAddress] string Email, [FromQuery] int ProfileId)
         {
-            var result = await _logic.ProfileStatus(Email,ProfileId);
+            var result = await _logic.ProfileStatus(Email, ProfileId);
             return Ok(result);
         }
-        
+
 
         /// <summary>
         /// Returns all the posts of a profile for a user, which user has subscribed/following
         /// </summary>
         /// <param name="Email"></param>
         /// <returns></returns>
-        [HttpGet,Route("SubscribedProfilePosts")]
+        [HttpGet, Route("SubscribedProfilePosts")]
         public async Task<ActionResult<ProfileViewRES>> SubscribedProfilePosts([FromQuery][EmailAddress] string Email)
         {
             var result = await _logic.GetSubscribedProfilePosts(Email);

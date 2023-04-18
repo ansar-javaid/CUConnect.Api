@@ -1,16 +1,9 @@
-﻿using AutoMapper;
-using CUConnect.Database;
-using CUConnect.Database.Entities;
+﻿using CUConnect.Database;
 using CUConnect.Logic;
-using CUConnect.Models;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using CUConnectDBContext = CUConnect.Database.Entities.CUConnectDBContext;
 
 namespace CUConnect.Api.Controllers
 {
@@ -18,22 +11,22 @@ namespace CUConnect.Api.Controllers
 
     [Route("api/profile")]
     [ApiController]
-   // [Authorize(Roles = nameof(Roles.User))]
+    // [Authorize(Roles = nameof(Roles.User))]
     public class ProfileController : ControllerBase
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ProfileLogic _logic;
 
-        public ProfileController(UserManager<AppUser> userManager,IHostEnvironment environment)
+        public ProfileController(UserManager<AppUser> userManager, IHostEnvironment environment)
         {
             _userManager = userManager;
-            _logic=new ProfileLogic(_userManager,environment);
+            _logic = new ProfileLogic(_userManager, environment);
         }
 
-        [HttpGet,Route("GetAllDepartment")]
+        [HttpGet, Route("GetAllDepartment")]
         public IActionResult GetDepartments()
         {
-           return Ok(new { Database= _logic.GetAllDepartment()});
+            return Ok(new { Database = _logic.GetAllDepartment() });
         }
 
 
@@ -41,7 +34,7 @@ namespace CUConnect.Api.Controllers
         public async Task<IActionResult> GetProfileById(int id)
         {
             var result = await _logic.GetProfileOnly(id);
-            return Ok(new { Database=result != null ? result : null });
+            return Ok(new { Database = result != null ? result : null });
         }
 
 
@@ -51,10 +44,10 @@ namespace CUConnect.Api.Controllers
         /// <param name="department"></param>
         /// <returns></returns>
 
-        [HttpPost,Route("CreatDepartment")]
+        [HttpPost, Route("CreatDepartment")]
         public IActionResult CreatDepartments([FromBody] DepartmentView department)
         {
-            return Ok(new { Database = _logic.CreatDepartment(department)});
+            return Ok(new { Database = _logic.CreatDepartment(department) });
         }
 
 
@@ -65,13 +58,24 @@ namespace CUConnect.Api.Controllers
         /// <param name="profileView"></param>
         /// <returns></returns>
 
-        [HttpPost,Route("CreatProfile")]
+        [HttpPost, Route("CreatProfile")]
         public async Task<IActionResult> CreatProfile([FromForm] ProfileView profileView)
         {
-            var result=await _logic.CreatProfile(profileView);
+            var result = await _logic.CreatProfile(profileView);
             return Ok(result);
         }
         //-----------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// This return the list of all users, available for profile registration/association.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("AvailableUsers")]
+        public async Task<ActionResult<RegisteredUsersViewRES>> GetRegisteredUsers()
+        {
+            var result = await _logic.GetRegisteredUsers();
+            return Ok(result);
+        }
 
 
     }

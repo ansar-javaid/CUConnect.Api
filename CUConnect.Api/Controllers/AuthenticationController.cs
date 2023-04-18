@@ -27,11 +27,11 @@ namespace CUConnect.Api.Controllers
             _configuration = configuration;
             _userManager = userManager;
             _roleManager = roleManager;
-            
+
         }
 
         //---------------------------------------------------------------------------------------------------------------------------------------
-        [HttpPost,Route("Register")]
+        [HttpPost, Route("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserView request)
         {
             // Check if a user with the same email already exists in the system.
@@ -76,14 +76,14 @@ namespace CUConnect.Api.Controllers
 
         //---------------------------------------------------------------------------------------------------------------------------------------
 
-        [HttpPost,Route("Login")]
+        [HttpPost, Route("Login")]
         public async Task<ActionResult<string>> Login([FromBody] LoginUserView request)
         {
             var userResult = await _userManager.FindByEmailAsync(request.Email);
             if (userResult != null && await _userManager.CheckPasswordAsync(userResult, request.Password))
             {
-               IList<Claim> claim=await _userManager.GetClaimsAsync(userResult);
-                string token = CreatToken(userResult,claim);
+                IList<Claim> claim = await _userManager.GetClaimsAsync(userResult);
+                string token = CreatToken(userResult, claim);
                 return Ok(new { Data = token });
             }
             return Unauthorized();
@@ -94,13 +94,13 @@ namespace CUConnect.Api.Controllers
         private string CreatToken(AppUser user, IList<Claim> claim)
         {
             var profileID = FindProfile(user.Id);
-            
+
             List<Claim> claims = new List<Claim>();
 
             claims.Add(new Claim(ClaimTypes.Email, user.UserName));
             claims.Add(new Claim(ClaimTypes.Name, user.FirstName));
             claims.Add(new Claim(ClaimTypes.UserData, profileID.ToString()));
-            foreach(var claimItem in claim)
+            foreach (var claimItem in claim)
                 claims.Add(new Claim(ClaimTypes.Role, claimItem.Value));
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("JsonWebTokenKeys:IssuerSigningKey").Value));
@@ -118,23 +118,23 @@ namespace CUConnect.Api.Controllers
         //--------------------------------------------------------------------------------------------------------------------------------------
         private int FindProfile(string userID)
         {
-            using(var _dbContext=new CUConnectDBContext())
+            using (var _dbContext = new CUConnectDBContext())
             {
-                var profile=_dbContext.Profiles.Where(x=>x.UserId.Equals(userID)).FirstOrDefault();
+                var profile = _dbContext.Profiles.Where(x => x.UserId.Equals(userID)).FirstOrDefault();
                 return profile != null ? profile.ProfileId : -1;
             }
         }
         //---------------------------------------------------------------------------------------------------------------------------------------
 
-        [HttpPost,Route("changePassword")]
-        [Authorize(Roles=nameof(Roles.User))]
+        [HttpPost, Route("changePassword")]
+        [Authorize(Roles = nameof(Roles.User))]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordView changePassword)
         {
-            var userResult=await _userManager.FindByEmailAsync(changePassword.Email);
+            var userResult = await _userManager.FindByEmailAsync(changePassword.Email);
             if (userResult != null)
             {
-                var status=await _userManager.ChangePasswordAsync(userResult,changePassword.OldPassword,changePassword.NewPassword);
-                if(status.Succeeded)
+                var status = await _userManager.ChangePasswordAsync(userResult, changePassword.OldPassword, changePassword.NewPassword);
+                if (status.Succeeded)
                     return Ok(new { Status = "Success", Message = "Password Changed!" });
             }
             return BadRequest(new { Status = "Faild", Message = "Try Again!" });

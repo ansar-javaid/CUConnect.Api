@@ -1,20 +1,14 @@
-﻿using AutoMapper;
-using CUConnect.Database.Entities;
+﻿using CUConnect.Database.Entities;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CUConnect.Logic
 {
-    public class PostsLogic:ControllerBase
+    public class PostsLogic : ControllerBase
     {
         private readonly FileUploadLogic _fileUploadLogic;
         public PostsLogic(IHostEnvironment environment)
@@ -23,7 +17,7 @@ namespace CUConnect.Logic
         }
         public async Task<IEnumerable<Post>> GetAllPosts()
         {
-            using(var _dbContext=new CUConnectDBContext())
+            using (var _dbContext = new CUConnectDBContext())
             {
                 return (await _dbContext.Posts.ToListAsync());
             }
@@ -48,7 +42,7 @@ namespace CUConnect.Logic
                 }
             }
             if (postsView.Files.Count > 5)
-                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Files Limit Excedded: 5 allowed", FileUploaded=false });
+                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Files Limit Excedded: 5 allowed", FileUploaded = false });
             using (var _dbContext = new CUConnectDBContext())
             {
                 var post = new Post()
@@ -60,7 +54,7 @@ namespace CUConnect.Logic
                 _dbContext.Posts.Add(post);
                 await _dbContext.SaveChangesAsync();
                 var result = await _fileUploadLogic.Upload(postsView.Files, post);
-                return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles=result.totalFiles, Size=result.size });
+                return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles = result.totalFiles, Size = result.size });
             }
         }
 
@@ -106,20 +100,20 @@ namespace CUConnect.Logic
             using (var _dbContext = new CUConnectDBContext())
             {
                 //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
-                var profile = await _dbContext.Profiles.Include(y=>y.Posts).ThenInclude(z=>z.Documents).Where(x => x.ProfileId == profileId)
-                     .SelectMany( z=>z.Posts.DefaultIfEmpty() ,(y,z) => new PostViewRES()
+                var profile = await _dbContext.Profiles.Include(y => y.Posts).ThenInclude(z => z.Documents).Where(x => x.ProfileId == profileId)
+                     .SelectMany(z => z.Posts.DefaultIfEmpty(), (y, z) => new PostViewRES()
                      {
-                         ProfileID=y.ProfileId,
-                         ProfileTitle=y.Title,
-                                        
-                         PostID= z.PostId,
-                         PostDescription =z.Description,
-                         PostsCreatedOn=z.PostedOn,
-                         FilePath=z.Documents.Select(x=> new PostViewRES.Files()
+                         ProfileID = y.ProfileId,
+                         ProfileTitle = y.Title,
+
+                         PostID = z.PostId,
+                         PostDescription = z.Description,
+                         PostsCreatedOn = z.PostedOn,
+                         FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
-                             Path=host+x.Name
+                             Path = host + x.Name
                          }).ToList()
-                         
+
                      }).ToListAsync();
                 return profile;
             }

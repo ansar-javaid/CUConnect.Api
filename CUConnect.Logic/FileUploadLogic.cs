@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
-using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace CUConnect.Logic
@@ -122,35 +121,35 @@ namespace CUConnect.Logic
 
 
         public async Task<(bool status, double size)> Upload(IFormFile file, Profile profile)
-            {
+        {
             double size = 0;
             var rootPath = Path.Combine(_environment.ContentRootPath, "wwwroot", "Resources", "Document");
             if (!Directory.Exists(rootPath))
                 Directory.CreateDirectory(rootPath);
             using (var _dbContext = new CUConnectDBContext())
             {
-                    string fileExtension = Path.GetExtension(file.FileName);
-                    string[] split = file.ContentType.Split('/');
-                    var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
+                string fileExtension = Path.GetExtension(file.FileName);
+                string[] split = file.ContentType.Split('/');
+                var uniqueFileName = Guid.NewGuid().ToString() + fileExtension;
 
-                    var filePath = Path.Combine(rootPath, uniqueFileName);
-                    using (var stream = new FileStream(filePath, FileMode.Create))
+                var filePath = Path.Combine(rootPath, uniqueFileName);
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    var document = new Document
                     {
-                        var document = new Document
-                        {
-                            ProfileId = profile.ProfileId,
-                            Name = uniqueFileName,
-                            FamilyType = fileExtension,
-                            MimeType = fileExtension,
-                            Path = $"/Resourses/Document/{uniqueFileName}"
-                        };
-                        await file.CopyToAsync(stream);
-                        _dbContext.Documents.Add(document);
-                        await _dbContext.SaveChangesAsync();
-                    }
-                    size = +file.Length;
+                        ProfileId = profile.ProfileId,
+                        Name = uniqueFileName,
+                        FamilyType = fileExtension,
+                        MimeType = fileExtension,
+                        Path = $"/Resourses/Document/{uniqueFileName}"
+                    };
+                    await file.CopyToAsync(stream);
+                    _dbContext.Documents.Add(document);
+                    await _dbContext.SaveChangesAsync();
                 }
-                return (true, size);
+                size = +file.Length;
+            }
+            return (true, size);
         }
 
 
