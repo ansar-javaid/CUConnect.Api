@@ -118,7 +118,8 @@ namespace CUConnect.Logic
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
                             await MakeAdmin(user);
-                            return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Cr" });
+                            var result = await _fileUploadLogic.Upload(profileView.File, profile);
+                            return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Cr", Uploaded = result.status });
                         }
 
                     }
