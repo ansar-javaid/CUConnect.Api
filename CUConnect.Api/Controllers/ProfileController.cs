@@ -29,9 +29,13 @@ namespace CUConnect.Api.Controllers
             return Ok(new { Database = _logic.GetAllDepartment() });
         }
 
-
+        /// <summary>
+        /// Returns a single Profile associated with its id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet, Route("GetProfileOnly")]
-        public async Task<IActionResult> GetProfileById(int id)
+        public async Task<ActionResult<ProfileOnlyViewRES>> GetProfileById(int id)
         {
             var result = await _logic.GetProfileOnly(id);
             return Ok(new { Database = result != null ? result : null });
@@ -76,6 +80,19 @@ namespace CUConnect.Api.Controllers
             var result = await _logic.GetRegisteredUsers();
             return Ok(result);
         }
+
+
+        /// <summary>
+        /// Retuen the list off all Profiles, registered in System.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("GetAllProfiles")]
+        public async Task<ActionResult<RegisteredUsersViewRES>> GetAllProfiles()
+        {
+            var result = await _logic.GetAllProfiles();
+            return Ok(result);
+        }
+
 
 
     }

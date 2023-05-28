@@ -212,6 +212,30 @@ namespace CUConnect.Logic
         }
         //---------------------------------------------------------------------------------------------------------------------------
 
+        public async Task<List<ProfileOnlyViewRES>> GetAllProfiles()
+        {
+            IHttpContextAccessor httpContext = new HttpContextAccessor();
+            var request = httpContext.HttpContext.Request;
+            var host = $"{request.Scheme}://{request.Host}/files/";
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                return await _dbContext.Profiles
+                    .Include(x => x.Documents)
+                    .Where(p => p.ProfileId.Equals(p.ProfileId))
+                    .Select(x => new ProfileOnlyViewRES
+                    {
+                        ProfileID = x.ProfileId,
+                        ProfileTitle = x.Title,
+                        ProfileDescription = x.Description,
+                        Path = host + x.Documents.FirstOrDefault().Name // Include the related Document entity
+                    }).ToListAsync();
+
+            }
+        }
+
+
+
+
         private async Task MakeAdmin(AppUser user)
         {
             // Remove the existing claim from the user

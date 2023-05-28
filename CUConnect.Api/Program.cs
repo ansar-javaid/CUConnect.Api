@@ -1,5 +1,6 @@
 using CUConnect.Database;
 using CUConnect.Database.Entities;
+using CUConnect.Logic.Notifications;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +12,15 @@ using System.Reflection;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddSignalR();
 //Sql Dependency Injection
 #region Database Contexts
+
+// We are using two DB Contexts one for Identity other for our Designed databse.
+// Follow the steps one by one.
+// 1 For Migration run this: Add-Migration step1 -context IdentityContext
+// 1.1 For Migration run this: Add-Migration step1.1 -context CUConnectDBContext
+// 2  For Database Update run this:Update-database -context CUConnectDBContext
 builder.Services.AddDbContext<IdentityContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CUConnect.Api")));
 builder.Services.AddDbContext<CUConnectDBContext>(
@@ -48,12 +56,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("EnableCORS", builder =>
     {
-        builder.AllowAnyOrigin()
+        builder
+        .AllowAnyMethod()
         .AllowAnyHeader()
-        .AllowAnyMethod();
+        .AllowCredentials()
+        .SetIsOriginAllowed((hosts) => true);
     });
 });
 #endregion
+
+
 
 builder.Services.AddHealthChecks();
 builder.Services.AddDirectoryBrowser();
@@ -108,6 +120,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapHealthChecks("health");
     endpoints.MapControllers();
+    endpoints.MapHub<NotificationHub>("/api/notifications");
 
     /* Uncomment line below to get the list of config variables resolved at runtime */
     //endpoints.MapGet("/dump-config", async ctx =>
