@@ -1,8 +1,10 @@
 ﻿using CUConnect.Database.Entities;
+using CUConnect.Logic.Notifications;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 
@@ -11,9 +13,11 @@ namespace CUConnect.Logic
     public class PostsLogic : ControllerBase
     {
         private readonly FileUploadLogic _fileUploadLogic;
-        public PostsLogic(IHostEnvironment environment)
+        private IHubContext<NotificationHub> _hubContext;
+        public PostsLogic(IHostEnvironment environment, IHubContext<NotificationHub> hubContext)
         {
             _fileUploadLogic = new FileUploadLogic(environment);
+            _hubContext = hubContext;
         }
         public async Task<IEnumerable<Post>> GetAllPosts()
         {
@@ -37,6 +41,7 @@ namespace CUConnect.Logic
                     };
                     _dbContext.Posts.Add(post);
                     await _dbContext.SaveChangesAsync();
+                    await Send(new NotificationRES() { ProfileName = "Important! Notification", PostID = 0, Message = postsView.Description });
                     return StatusCode(StatusCodes.Status201Created, new { Status = true, Msg = "No Files found to Upload", Uploaded = false });
 
                 }
@@ -54,6 +59,7 @@ namespace CUConnect.Logic
                 _dbContext.Posts.Add(post);
                 await _dbContext.SaveChangesAsync();
                 var result = await _fileUploadLogic.Upload(postsView.Files, post);
+                await Send(new NotificationRES() { ProfileName = "Important! Notification", PostID = 0, Message = postsView.Description });
                 return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles = result.totalFiles, Size = result.size });
             }
         }
@@ -117,6 +123,20 @@ namespace CUConnect.Logic
                      }).ToListAsync();
                 return profile;
             }
+        }
+
+        private async Task<IActionResult> Send(NotificationRES notification)
+        {
+            try
+            {
+                await _hubContext.Clients.All.SendAsync("Notification", notification);
+
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+            return Ok();
         }
 
     }

@@ -1,7 +1,9 @@
 ﻿using CUConnect.Logic;
+using CUConnect.Logic.Notifications;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CUConnect.Api.Controllers
 {
@@ -12,12 +14,13 @@ namespace CUConnect.Api.Controllers
         //Dependencies-------------------------------------
         private readonly PostsLogic _postsLogic;
         private readonly IHostEnvironment _environment;
+        private IHubContext<NotificationHub> _hubContext;
 
         //Constructor---------------------------------------
-        public PostsController(IHostEnvironment environment)
+        public PostsController(IHostEnvironment environment, IHubContext<NotificationHub> hubContext)
         {
             _environment = environment;
-            _postsLogic = new PostsLogic(_environment);
+            _postsLogic = new PostsLogic(_environment, hubContext);
         }
 
         #region
