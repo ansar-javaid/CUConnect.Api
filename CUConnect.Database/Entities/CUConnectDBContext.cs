@@ -24,9 +24,11 @@ namespace CUConnect.Database.Entities
         public virtual DbSet<Document> Documents { get; set; } = null!;
         public virtual DbSet<Enrollment> Enrollments { get; set; } = null!;
         public virtual DbSet<Post> Posts { get; set; } = null!;
+        public virtual DbSet<PostTag> PostTags { get; set; } = null!;
         public virtual DbSet<Profile> Profiles { get; set; } = null!;
         public virtual DbSet<Reaction> Reactions { get; set; } = null!;
         public virtual DbSet<Subscription> Subscriptions { get; set; } = null!;
+        public virtual DbSet<Tag> Tags { get; set; } = null!;
 
 
 
@@ -115,6 +117,21 @@ namespace CUConnect.Database.Entities
                     .HasForeignKey(d => d.ProfileId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Posts.ProfileID");
+            });
+
+            modelBuilder.Entity<PostTag>(entity =>
+            {
+                entity.HasOne(d => d.Post)
+                    .WithMany(p => p.PostTags)
+                    .HasForeignKey(d => d.PostId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_PostTags.PostID");
+
+                entity.HasOne(d => d.Tag)
+                    .WithMany(p => p.PostTags)
+                    .HasForeignKey(d => d.TagId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_PostTags.TagID");
             });
 
             modelBuilder.Entity<Profile>(entity =>

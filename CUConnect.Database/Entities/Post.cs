@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
@@ -8,6 +11,7 @@ namespace CUConnect.Database.Entities
         public Post()
         {
             Documents = new HashSet<Document>();
+            PostTags = new HashSet<PostTag>();
             Reactions = new HashSet<Reaction>();
         }
 
@@ -25,6 +29,8 @@ namespace CUConnect.Database.Entities
         public virtual Profile Profile { get; set; } = null!;
         [InverseProperty("Posts")]
         public virtual ICollection<Document> Documents { get; set; }
+        [InverseProperty("Post")]
+        public virtual ICollection<PostTag> PostTags { get; set; }
         [InverseProperty("Posts")]
         public virtual ICollection<Reaction> Reactions { get; set; }
     }
