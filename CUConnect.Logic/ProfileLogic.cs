@@ -1,6 +1,7 @@
 ﻿using CUConnect.Database;
 using CUConnect.Database.Entities;
 using CUConnect.Models;
+using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
@@ -14,7 +15,7 @@ using Profile = CUConnect.Database.Entities.Profile;
 
 namespace CUConnect.Logic
 {
-    public class ProfileLogic : ControllerBase
+    public class ProfileLogic : ControllerBase, IProfileREPO
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly FileUploadLogic _fileUploadLogic;
@@ -24,13 +25,22 @@ namespace CUConnect.Logic
             _fileUploadLogic = new FileUploadLogic(environment);
         }
 
-        #region All Departments
-        public async Task<IEnumerable<Department>> GetAllDepartment()
-        {
 
+
+
+
+
+        #region All Departments
+        public async Task<List<DepartmentViewRES>> GetAllDepartment()
+        {
             using (var _dbContext = new CUConnectDBContext())
             {
-                var result = await _dbContext.Departments.ToListAsync();
+                var result = await _dbContext.Departments
+                    .Select(x => new DepartmentViewRES
+                    {
+                        DepartmentId = x.DepartmentId,
+                        Name = x.Name
+                    }).ToListAsync();
                 return result;
             }
         }
@@ -49,7 +59,7 @@ namespace CUConnect.Logic
                 };
                 _dbContext.Departments.Add(department);
                 await _dbContext.SaveChangesAsync();
-                return Ok();
+                return Ok("Department Created");
             }
         }
         #endregion
@@ -167,28 +177,6 @@ namespace CUConnect.Logic
         }
 
 
-        public async Task<List<PostViewRES>> GetProfileWithPosts(int profileId)
-        {
-            using (var _dbContext = new CUConnectDBContext())
-            {
-                //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
-                return await (from x in _dbContext.Profiles
-                              where (x.ProfileId == profileId)
-                              join y in _dbContext.Posts
-                              on x.ProfileId equals y.ProfileId
-                              select new PostViewRES
-                              {
-                                  ProfileID = x.ProfileId,
-                                  ProfileTitle = x.Title,
-
-
-                                  PostID = y.PostId,
-                                  PostDescription = y.Description,
-                                  PostsCreatedOn = y.PostedOn,
-
-                              }).ToListAsync();
-            }
-        }//------------------------------------------------------------------------------------------------------------------------
 
         public async Task<ProfileOnlyViewRES> GetProfileOnly(int profileId)
         {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
@@ -16,7 +13,6 @@ namespace CUConnect.Database.Entities
         [Column("UserID")]
         [StringLength(450)]
         public string UserId { get; set; } = null!;
-        public int ReactinType { get; set; }
 
         [ForeignKey("PostsId")]
         [InverseProperty("Reactions")]

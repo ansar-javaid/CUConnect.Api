@@ -1,5 +1,6 @@
 ﻿using CUConnect.Database;
 using CUConnect.Logic;
+using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Identity;
@@ -17,16 +18,19 @@ namespace CUConnect.Api.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly ProfileLogic _logic;
 
-        public ProfileController(UserManager<AppUser> userManager, IHostEnvironment environment)
+        private readonly IProfileREPO _profile;
+
+        public ProfileController(UserManager<AppUser> userManager, IHostEnvironment environment, IProfileREPO profile)
         {
             _userManager = userManager;
             _logic = new ProfileLogic(_userManager, environment);
+            _profile = profile;
         }
 
         [HttpGet, Route("GetAllDepartment")]
-        public IActionResult GetDepartments()
+        public async Task<ActionResult<DepartmentViewRES>> GetDepartments()
         {
-            return Ok(new { Database = _logic.GetAllDepartment() });
+            return Ok(await _profile.GetAllDepartment());
         }
 
         /// <summary>
@@ -37,8 +41,35 @@ namespace CUConnect.Api.Controllers
         [HttpGet, Route("GetProfileOnly")]
         public async Task<ActionResult<ProfileOnlyViewRES>> GetProfileById(int id)
         {
-            var result = await _logic.GetProfileOnly(id);
-            return Ok(new { Database = result != null ? result : null });
+            var result = await _profile.GetProfileOnly(id);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        /// <summary>
+        /// This return the list of all users, available for profile registration/association.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("AvailableUsers")]
+        public async Task<ActionResult<RegisteredUsersViewRES>> GetRegisteredUsers()
+        {
+            return Ok(await _profile.GetRegisteredUsers());
+        }
+
+
+        /// <summary>
+        /// Retuen the list off all Profiles, registered in System.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("GetAllProfiles")]
+        public async Task<ActionResult<RegisteredUsersViewRES>> GetAllProfiles()
+        {
+            return Ok(await _profile.GetAllProfiles());
         }
 
 
@@ -49,9 +80,9 @@ namespace CUConnect.Api.Controllers
         /// <returns></returns>
 
         [HttpPost, Route("CreatDepartment")]
-        public IActionResult CreatDepartments([FromBody] DepartmentView department)
+        public async Task<ActionResult> CreatDepartments([FromBody] DepartmentView department)
         {
-            return Ok(new { Database = _logic.CreatDepartment(department) });
+            return Ok(await _profile.CreatDepartment(department));
         }
 
 
@@ -63,34 +94,9 @@ namespace CUConnect.Api.Controllers
         /// <returns></returns>
 
         [HttpPost, Route("CreatProfile")]
-        public async Task<IActionResult> CreatProfile([FromForm] ProfileView profileView)
+        public async Task<ActionResult> CreatProfile([FromForm] ProfileView profileView)
         {
-            var result = await _logic.CreatProfile(profileView);
-            return Ok(result);
-        }
-        //-----------------------------------------------------------------------------------------
-
-        /// <summary>
-        /// This return the list of all users, available for profile registration/association.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet, Route("AvailableUsers")]
-        public async Task<ActionResult<RegisteredUsersViewRES>> GetRegisteredUsers()
-        {
-            var result = await _logic.GetRegisteredUsers();
-            return Ok(result);
-        }
-
-
-        /// <summary>
-        /// Retuen the list off all Profiles, registered in System.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet, Route("GetAllProfiles")]
-        public async Task<ActionResult<RegisteredUsersViewRES>> GetAllProfiles()
-        {
-            var result = await _logic.GetAllProfiles();
-            return Ok(result);
+            return Ok(await _profile.CreatProfile(profileView));
         }
 
 

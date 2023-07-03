@@ -1,5 +1,6 @@
 ﻿using CUConnect.Database;
 using CUConnect.Database.Entities;
+using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +11,7 @@ using static CUConnect.Models.ResponseModels.PostViewRES;
 
 namespace CUConnect.Logic
 {
-    public class SubscriptionLogic : ControllerBase
+    public class SubscriptionLogic : ControllerBase, ISubscriptionREPO
     {
         //Identity
         private readonly UserManager<AppUser> _userManager;
@@ -59,18 +60,56 @@ namespace CUConnect.Logic
         }
         #endregion
 
-        //=====================================================================================================================================================
-        public async Task<IActionResult> ProfileStatus(string Email, int ProfileId)
+        #region React on Post
+        public async Task<IActionResult> ReactOnPost(ReactionView reactionView)
         {
             using (var _dbContext = new CUConnectDBContext())
             {
-                var user = await _userManager.FindByEmailAsync(Email);
-                var profieResult = _dbContext.Profiles.Where(x => x.ProfileId.Equals(ProfileId)).FirstOrDefault();
+                var user = await _userManager.FindByEmailAsync(reactionView.Email);
+                var postResult = _dbContext.Posts.Where(x => x.PostId.Equals(reactionView.PostID)).FirstOrDefault();
+                if (user != null && postResult != null)
+                {
+                    var reactionResult = _dbContext.Reactions
+                        .Where(x => x.PostsId.Equals(reactionView.PostID)
+                        && x.UserId.Equals(user.Id)).FirstOrDefault();
+                    if (reactionResult != null)
+                    {
+                        _dbContext.Reactions.Remove(reactionResult);
+                        await _dbContext.SaveChangesAsync();
+                        return StatusCode(StatusCodes.Status200OK, new { Status = false, Msg = "Un-Reacted", Post = postResult.PostId });
+
+                    }
+                    else
+                    {
+                        var reaction = new Reaction()
+                        {
+                            PostsId = reactionView.PostID,
+                            UserId = user.Id,
+                        };
+                        _dbContext.Reactions.Add(reaction);
+                        await _dbContext.SaveChangesAsync();
+                        return StatusCode(StatusCodes.Status200OK, new { status = true, Msg = "Reacted", Post = postResult.PostId });
+                    }
+                }
+                return StatusCode(StatusCodes.Status404NotFound, new { status = false, Msg = "User or Post not found" });
+            }
+        }
+        #endregion
+
+        //=====================================================================================================================================================
+
+        #region Profile Status
+        public async Task<IActionResult> ProfileStatus(SubscriptionView subscriptionView)
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                var user = await _userManager.FindByEmailAsync(subscriptionView.Email);
+                var profieResult = _dbContext.Profiles.Where(x => x.ProfileId.Equals(subscriptionView.ProfileID)).FirstOrDefault();
 
                 if (user != null && profieResult != null)
                 {
                     var subscriptionResult = _dbContext.Subscriptions
-                        .Where(x => x.ProfileId.Equals(ProfileId)
+                        .Where(x => x.ProfileId.Equals(subscriptionView.ProfileID)
                         && x.UserId.Equals(user.Id)).FirstOrDefault();
                     if (subscriptionResult != null)
                     {
@@ -81,7 +120,30 @@ namespace CUConnect.Logic
                 return StatusCode(StatusCodes.Status404NotFound, new { status = false, Msg = "User or Profile not found" });
             }
         }
-
+        #endregion
+        //=====================================================================================================================================================
+        #region Post Reaction Status
+        public async Task<IActionResult> ReactionStatus(ReactionView reactionView)
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                var user = await _userManager.FindByEmailAsync(reactionView.Email);
+                var postResult = _dbContext.Posts.Where(x => x.PostId.Equals(reactionView.PostID)).FirstOrDefault();
+                if (user != null && postResult != null)
+                {
+                    var reactionResult = _dbContext.Reactions
+                       .Where(x => x.PostsId.Equals(reactionView.PostID)
+                       && x.UserId.Equals(user.Id)).FirstOrDefault();
+                    if (reactionResult != null)
+                    {
+                        return StatusCode(StatusCodes.Status200OK, new { status = true, Msg = "Reacted", Post = postResult.PostId });
+                    }
+                    return StatusCode(StatusCodes.Status404NotFound, new { Status = false, Msg = "Un-Reacted", Post = postResult.PostId });
+                }
+                return StatusCode(StatusCodes.Status404NotFound, new { status = false, Msg = "User or Profile not found" });
+            }
+        }
+        #endregion
         //=====================================================================================================================================================
 
         public async Task<List<PostViewRES>> GetSubscribedProfilePosts(string Email)
@@ -125,6 +187,7 @@ namespace CUConnect.Logic
                 return profile;
             }
         }
+        //=====================================================================================================================================================
     }
 }
 

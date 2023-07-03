@@ -1,5 +1,6 @@
 ﻿using CUConnect.Database.Entities;
 using CUConnect.Logic.Notifications;
+using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace CUConnect.Logic
 {
-    public class PostsLogic : ControllerBase
+    public class PostsLogic : ControllerBase, IPostREPO
     {
         private readonly FileUploadLogic _fileUploadLogic;
         private IHubContext<NotificationHub> _hubContext;
@@ -19,16 +20,12 @@ namespace CUConnect.Logic
             _fileUploadLogic = new FileUploadLogic(environment);
             _hubContext = hubContext;
         }
-        public async Task<IEnumerable<Post>> GetAllPosts()
-        {
-            using (var _dbContext = new CUConnectDBContext())
-            {
-                return (await _dbContext.Posts.ToListAsync());
-            }
-        }
+
 
         public async Task<IActionResult> CreatPost(PostsView postsView)
         {
+            if (postsView.ProfileID < 0 || postsView.Description == null)
+                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Invalid Data", FileUploaded = false });
             if (postsView.Files == null)
             {
                 using (var _dbContext = new CUConnectDBContext())
@@ -64,39 +61,7 @@ namespace CUConnect.Logic
             }
         }
 
-        /*
 
-                public async Task<List<PostViewRES>> GetPosts(int profileId)
-                {
-                    IHttpContextAccessor httpContext = new HttpContextAccessor();
-                    var request = httpContext.HttpContext.Request;
-                    var host = $"{request.Scheme}://{request.Host}";
-                    using (var _dbContext = new CUConnectDBContext())
-                    {
-                        //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
-                        return await (from profile in _dbContext.Profiles
-                                      where (profile.ProfileId == profileId)
-                                      join post in _dbContext.Posts
-                                      on profile.ProfileId equals post.ProfileId into pe
-                                      from x in pe.DefaultIfEmpty()
-                                      join z in _dbContext.Documents
-                                      on x.PostId equals z.PostsId into pec
-                                      from y in pec.DefaultIfEmpty()
-                                      select new PostViewRES
-                                      {
-                                          ProfileID = profile.ProfileId,
-                                          ProfileTitle = profile.Title,
-
-
-                                          PostID = x.PostId,
-                                          PostDescription = x.Description,
-                                          PostsCreatedOn = x.PostedOn,
-                                          FilePath = x.Documents.Select(c => new PostViewRES.Files() { Path = host + c.Path }).ToList()
-                                      }).ToListAsync();
-                    }
-                }
-
-        */
 
         public async Task<List<PostViewRES>> GetPosts(int profileId)
         {
@@ -106,7 +71,7 @@ namespace CUConnect.Logic
             using (var _dbContext = new CUConnectDBContext())
             {
                 //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
-                var profile = await _dbContext.Profiles.Include(y => y.Posts).ThenInclude(z => z.Documents).Where(x => x.ProfileId == profileId)
+                return await _dbContext.Profiles.Include(y => y.Posts).ThenInclude(z => z.Documents).Where(x => x.ProfileId == profileId)
                      .SelectMany(z => z.Posts.DefaultIfEmpty(), (y, z) => new PostViewRES()
                      {
                          ProfileID = y.ProfileId,
@@ -121,7 +86,6 @@ namespace CUConnect.Logic
                          }).ToList()
 
                      }).ToListAsync();
-                return profile;
             }
         }
 

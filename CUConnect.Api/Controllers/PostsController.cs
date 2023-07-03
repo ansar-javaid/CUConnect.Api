@@ -1,9 +1,7 @@
-﻿using CUConnect.Logic;
-using CUConnect.Logic.Notifications;
+﻿using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace CUConnect.Api.Controllers
 {
@@ -12,28 +10,34 @@ namespace CUConnect.Api.Controllers
     public class PostsController : ControllerBase
     {
         //Dependencies-------------------------------------
-        private readonly PostsLogic _postsLogic;
-        private readonly IHostEnvironment _environment;
-        private IHubContext<NotificationHub> _hubContext;
+        private readonly IPostREPO _post;
 
         //Constructor---------------------------------------
-        public PostsController(IHostEnvironment environment, IHubContext<NotificationHub> hubContext)
+        public PostsController(IPostREPO post)
         {
-            _environment = environment;
-            _postsLogic = new PostsLogic(_environment, hubContext);
+            _post = post;
         }
 
         #region
 
+
         /// <summary>
-        /// Get All Posts: everything
+        /// Get all the related Posts of a profile by accpeting the Profile ID.
         /// </summary>
+        /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet, Route("GetAllPosts")]
-        public IActionResult GetAllPosts()
+        [HttpGet, Route("GetPostsByProfile")]
+        public async Task<ActionResult<List<PostViewRES>>> GetPostsById(int id)
         {
-            return Ok(new { Data = _postsLogic.GetAllPosts() });
+            var result = await _post.GetPosts(id);
+            if (result.Count == 0)
+            {
+                return NotFound();
+            }
+            return Ok(result);
         }
+
+
 
         /// <summary>
         /// Creat a Post for related Profile with the support of multiple file upload
@@ -44,22 +48,8 @@ namespace CUConnect.Api.Controllers
         [HttpPost, Route("CreatePost")]
         public async Task<IActionResult> CreatePost([FromForm] PostsView postsView)
         {
-            var result = await _postsLogic.CreatPost(postsView);
+            var result = await _post.CreatPost(postsView);
             return Ok(result);
-        }
-
-
-
-        /// <summary>
-        /// Get all the related Posts of a profile by accpeting the Profile ID.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet, Route("GetPostsByProfile")]
-        public async Task<ActionResult<PostViewRES>> GetPostsById(int id)
-        {
-            var result = await _postsLogic.GetPosts(id);
-            return Ok(new { Database = result != null ? result : null });
         }
 
         #endregion

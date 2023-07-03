@@ -1,10 +1,11 @@
 using CUConnect.Database;
 using CUConnect.Database.Entities;
+using CUConnect.Logic;
 using CUConnect.Logic.Notifications;
+using CUConnect.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -26,6 +27,14 @@ builder.Services.AddDbContext<IdentityContext>(
 builder.Services.AddDbContext<CUConnectDBContext>(
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("CUConnect.Api")));
 builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<IdentityContext>();
+#endregion
+
+
+#region Repositiry Scops
+builder.Services.AddScoped<IAuthenticationREPO, AuthenticationLogic>();
+builder.Services.AddScoped<IProfileREPO, ProfileLogic>();
+builder.Services.AddScoped<IPostREPO, PostsLogic>();
+builder.Services.AddScoped<ISubscriptionREPO, SubscriptionLogic>();
 #endregion
 
 builder.Services.AddControllers();
@@ -90,6 +99,24 @@ builder.Services.AddAuthentication(options =>
                     ValidAudience = builder.Configuration["JsonWebTokenKeys:ValidAudience"],
                     IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["JsonWebTokenKeys:IssuerSigningKey"]))
                 };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // If the request is for our hub...
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) &&
+                            (path.StartsWithSegments("/api/notifications")))
+                        {
+                            // Read the token out of the query string
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 #endregion
 
@@ -106,12 +133,12 @@ app.UseHttpsRedirection();
 app.UseCors("EnableCORS");
 
 app.UseRouting();
-app.UseStaticFiles(new StaticFileOptions
+/*app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Resources", "Document")),
     RequestPath = "/files"
-});
+});*/
 
 app.UseAuthentication();
 app.UseAuthorization();

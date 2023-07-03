@@ -16,18 +16,24 @@ namespace CUConnect.Api.Controllers
 
         [HttpPost]
         [Route("sendMessage")]
-        public async Task<IActionResult> Send(string message)
+        public IActionResult SendNotification(string userEmail, string notification)
         {
-            try
-            {
-                await _hubContext.Clients.All.SendAsync("Notification", message);
+            // Get the connection IDs associated with the user's email
+            var connections = UserConnectionManager.Instance.GetConnections(userEmail);
 
-            }
-            catch (Exception e)
+            if (connections.Count > 0)
             {
-                return BadRequest(e.Message);
+                // Send the notification to each connection
+                foreach (var connectionId in connections)
+                {
+                    _hubContext.Clients.Client(connectionId).SendAsync("Notification", notification);
+                }
+
+                return Ok("Notification sent successfully.");
             }
-            return Ok();
+
+            return NotFound("No connections found for the user's email.");
         }
+
     }
 }
