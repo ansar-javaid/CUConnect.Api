@@ -1,5 +1,4 @@
 ﻿using CUConnect.Database;
-using CUConnect.Logic;
 using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
@@ -15,15 +14,12 @@ namespace CUConnect.Api.Controllers
     // [Authorize(Roles = nameof(Roles.User))]
     public class ProfileController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly ProfileLogic _logic;
+
 
         private readonly IProfileREPO _profile;
 
         public ProfileController(UserManager<AppUser> userManager, IHostEnvironment environment, IProfileREPO profile)
         {
-            _userManager = userManager;
-            _logic = new ProfileLogic(_userManager, environment);
             _profile = profile;
         }
 

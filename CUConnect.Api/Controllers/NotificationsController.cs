@@ -26,7 +26,7 @@ namespace CUConnect.Api.Controllers
                 // Send the notification to each connection
                 foreach (var connectionId in connections)
                 {
-                    _hubContext.Clients.Client(connectionId).SendAsync("Notification", notification);
+                    _hubContext.Clients.Client(connectionId).SendAsync("notification", notification);
                 }
 
                 return Ok("Notification sent successfully.");

@@ -158,6 +158,7 @@ namespace CUConnect.Logic
                 var profile = await _dbContext.Profiles
                     .Include(x => x.Subscriptions)
                     .Include(y => y.Posts).ThenInclude(z => z.Documents)
+                    .Include(x => x.Posts).ThenInclude(r => r.Reactions)
                     .Select(x => new
                     {
                         profiles = x,
@@ -177,6 +178,7 @@ namespace CUConnect.Logic
                          PostID = z.PostId,
                          PostDescription = z.Description,
                          PostsCreatedOn = z.PostedOn,
+                         Reaction = z.Reactions.Any(r => r.UserId == user.Id), // Check if a reaction is found for the user
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
                              Path = host + x.Name

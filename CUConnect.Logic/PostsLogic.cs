@@ -1,13 +1,16 @@
-﻿using CUConnect.Database.Entities;
+﻿using CUConnect.Database;
+using CUConnect.Database.Entities;
 using CUConnect.Logic.Notifications;
 using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using static CUConnect.Models.ResponseModels.PostViewRES;
 
 namespace CUConnect.Logic
 {
@@ -15,10 +18,14 @@ namespace CUConnect.Logic
     {
         private readonly FileUploadLogic _fileUploadLogic;
         private IHubContext<NotificationHub> _hubContext;
-        public PostsLogic(IHostEnvironment environment, IHubContext<NotificationHub> hubContext)
+        //Identity
+        private readonly UserManager<AppUser> _userManager;
+        //Constructor--------------------------------------------------
+        public PostsLogic(IHostEnvironment environment, IHubContext<NotificationHub> hubContext, UserManager<AppUser> userManager)
         {
             _fileUploadLogic = new FileUploadLogic(environment);
             _hubContext = hubContext;
+            _userManager = userManager;
         }
 
 
@@ -65,17 +72,25 @@ namespace CUConnect.Logic
 
         public async Task<List<PostViewRES>> GetPosts(int profileId)
         {
+            //var user = await _userManager.FindByEmailAsync(Email);
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
             using (var _dbContext = new CUConnectDBContext())
             {
                 //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
-                return await _dbContext.Profiles.Include(y => y.Posts).ThenInclude(z => z.Documents).Where(x => x.ProfileId == profileId)
+                return await _dbContext.Profiles
+                    .Include(y => y.Posts)
+                    .ThenInclude(z => z.Documents)
+                    .Where(x => x.ProfileId.Equals(profileId))
                      .SelectMany(z => z.Posts.DefaultIfEmpty(), (y, z) => new PostViewRES()
                      {
                          ProfileID = y.ProfileId,
                          ProfileTitle = y.Title,
+                         CoverPicture = y.Documents
+                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
+                                         .Select(doc => new Cover() { ProfileImage = host + doc.Name })
+                                         .FirstOrDefault(),
 
                          PostID = z.PostId,
                          PostDescription = z.Description,

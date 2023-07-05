@@ -21,6 +21,7 @@
         public string? PostDescription { get; set; }
 
         public DateTime? PostsCreatedOn { get; set; }
+        public bool Reaction { get; set; }
 
         public List<Files>? FilePath { get; set; }
 

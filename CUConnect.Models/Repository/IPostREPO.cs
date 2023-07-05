@@ -6,11 +6,11 @@ namespace CUConnect.Models.Repository
 {
     public interface IPostREPO
     {
-        #region POST Methods
+        #region GET Methods
         public Task<List<PostViewRES>> GetPosts(int profileId);
         #endregion
 
-        #region GET Methods
+        #region POST Methods
         public Task<IActionResult> CreatPost(PostsView postsView);
         #endregion
 

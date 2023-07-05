@@ -45,7 +45,7 @@ namespace CUConnect.Logic.Notifications
                 List<string> connections = UserConnectionManager.Instance.GetConnections(userEmail);
                 foreach (var connectionId in connections)
                 {
-                    await Clients.Client(connectionId).SendAsync("Notification", notification);
+                    await Clients.Client(connectionId).SendAsync("notification", notification);
                 }
             }
         }
