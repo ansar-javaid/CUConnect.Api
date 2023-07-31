@@ -104,6 +104,36 @@ namespace CUConnect.Logic
             }
         }
 
+
+        public async Task<ActionResult<PostViewRES>> GetPost(int postId)
+        {
+            //var user = await _userManager.FindByEmailAsync(Email);
+            IHttpContextAccessor httpContext = new HttpContextAccessor();
+            var request = httpContext.HttpContext.Request;
+            var host = $"{request.Scheme}://{request.Host}/files/";
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
+                return await _dbContext.Posts
+                    .Include(z => z.Documents)
+                    .Where(x => x.PostId.Equals(postId))
+                     .Select(z => new PostViewRES()
+                     {
+
+                         PostID = z.PostId,
+                         PostDescription = z.Description,
+                         PostsCreatedOn = z.PostedOn,
+                         FilePath = z.Documents.Select(x => new PostViewRES.Files()
+                         {
+                             Path = host + x.Name
+                         }).ToList()
+
+                     }).FirstOrDefaultAsync();
+            }
+        }
+
+
+
         private async Task<IActionResult> Send(NotificationRES notification)
         {
             try

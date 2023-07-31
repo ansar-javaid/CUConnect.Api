@@ -1,6 +1,8 @@
-﻿using CUConnect.Models.Repository;
+﻿using CUConnect.Models;
+using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,6 +10,7 @@ namespace CUConnect.Api.Controllers
 {
     [Route("api/subscription")]
     [ApiController]
+    [Authorize(Roles = nameof(Roles.User))]
     public class SubscriptionController : ControllerBase
     {
         private readonly ISubscriptionREPO _subscription;

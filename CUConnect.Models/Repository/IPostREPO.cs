@@ -8,6 +8,7 @@ namespace CUConnect.Models.Repository
     {
         #region GET Methods
         public Task<List<PostViewRES>> GetPosts(int profileId);
+        public Task<ActionResult<PostViewRES>> GetPost(int postId);
         #endregion
 
         #region POST Methods

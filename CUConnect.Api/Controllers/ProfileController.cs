@@ -1,7 +1,9 @@
 ﻿using CUConnect.Database;
+using CUConnect.Models;
 using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +13,6 @@ namespace CUConnect.Api.Controllers
 
     [Route("api/profile")]
     [ApiController]
-    // [Authorize(Roles = nameof(Roles.User))]
     public class ProfileController : ControllerBase
     {
 
@@ -23,7 +24,13 @@ namespace CUConnect.Api.Controllers
             _profile = profile;
         }
 
+
+        /// <summary>
+        /// Returns the list of All departments from Database
+        /// </summary>
+        /// <returns></returns>
         [HttpGet, Route("GetAllDepartment")]
+        [Authorize(Roles = nameof(Roles.Supper))]
         public async Task<ActionResult<DepartmentViewRES>> GetDepartments()
         {
             return Ok(await _profile.GetAllDepartment());
@@ -52,6 +59,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("AvailableUsers")]
+        [Authorize(Roles = nameof(Roles.Supper))]
         public async Task<ActionResult<RegisteredUsersViewRES>> GetRegisteredUsers()
         {
             return Ok(await _profile.GetRegisteredUsers());
@@ -63,6 +71,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("GetAllProfiles")]
+        [Authorize(Roles = nameof(Roles.User))]
         public async Task<ActionResult<RegisteredUsersViewRES>> GetAllProfiles()
         {
             return Ok(await _profile.GetAllProfiles());
@@ -74,7 +83,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <param name="department"></param>
         /// <returns></returns>
-
+        [Authorize(Roles = nameof(Roles.Supper))]
         [HttpPost, Route("CreatDepartment")]
         public async Task<ActionResult> CreatDepartments([FromBody] DepartmentView department)
         {
@@ -88,7 +97,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <param name="profileView"></param>
         /// <returns></returns>
-
+        [Authorize(Roles = nameof(Roles.Supper))]
         [HttpPost, Route("CreatProfile")]
         public async Task<ActionResult> CreatProfile([FromForm] ProfileView profileView)
         {

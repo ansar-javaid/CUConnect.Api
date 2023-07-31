@@ -22,6 +22,7 @@
 
         public DateTime? PostsCreatedOn { get; set; }
         public bool Reaction { get; set; }
+        public int TotalReactions { get; set; }
 
         public List<Files>? FilePath { get; set; }
 

@@ -15,6 +15,12 @@ namespace CUConnect.Api.Controllers
             _authentication = authenticationREPO;
         }
 
+
+        /// <summary>
+        /// Register a new user in Database
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost, Route("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserView request)
         {
@@ -36,6 +42,12 @@ namespace CUConnect.Api.Controllers
             return Ok(result.Result);
         }
 
+
+        /// <summary>
+        /// Use to change password, accepts valid user's email, with old and new password
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost, Route("changePassword")]
 
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordView request)

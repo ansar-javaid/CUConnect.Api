@@ -178,13 +178,14 @@ namespace CUConnect.Logic
                          PostID = z.PostId,
                          PostDescription = z.Description,
                          PostsCreatedOn = z.PostedOn,
-                         Reaction = z.Reactions.Any(r => r.UserId == user.Id), // Check if a reaction is found for the user
+                         Reaction = z.Reactions.Any(r => r.UserId == user.Id),
+                         TotalReactions = z.Reactions.Select(r => r.PostsId.Equals(r.PostsId)).Count(),
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
                              Path = host + x.Name
                          }).ToList()
 
-                     }).OrderByDescending(p => p.PostsCreatedOn) // Order by PostsCreatedOn property in descending order
+                     }).OrderByDescending(p => p.TotalReactions)
                        .ToListAsync();
                 return profile;
             }
