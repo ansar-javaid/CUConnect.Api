@@ -100,9 +100,9 @@ builder.Services.AddCors(options =>
 #endregion
 
 
-
-builder.Services.AddHealthChecks();
 builder.Services.AddDirectoryBrowser();
+builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
+builder.Services.AddResponseCaching();
 
 //JWT Configuration
 #region JWT Authentication
@@ -157,6 +157,8 @@ if (app.Environment.IsDevelopment())
 app.UseSwagger();
 app.UseSwaggerUI();
 
+app.UseResponseCaching();
+app.UseResponseCompression();
 
 app.UseHttpsRedirection();
 app.UseCors("EnableCORS");
@@ -174,7 +176,6 @@ app.UseAuthorization();
 
 app.UseEndpoints(endpoints =>
 {
-    endpoints.MapHealthChecks("health");
     endpoints.MapControllers();
     endpoints.MapHub<NotificationHub>("/api/notifications");
 
