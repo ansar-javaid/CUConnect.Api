@@ -30,7 +30,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("GetAllDepartment")]
-        [Authorize(Roles = nameof(Roles.Supper))]
+        //[Authorize(Roles = nameof(Roles.Supper))]
         public async Task<ActionResult<DepartmentViewRES>> GetDepartments()
         {
             return Ok(await _profile.GetAllDepartment());
@@ -59,7 +59,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("AvailableUsers")]
-        [Authorize(Roles = nameof(Roles.Supper))]
+       // [Authorize(Roles = nameof(Roles.Supper))]
         public async Task<ActionResult<RegisteredUsersViewRES>> GetRegisteredUsers()
         {
             return Ok(await _profile.GetRegisteredUsers());
@@ -71,7 +71,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("GetAllProfiles")]
-        [Authorize(Roles = nameof(Roles.User))]
+       // [Authorize(Roles = nameof(Roles.User))]
         public async Task<ActionResult<RegisteredUsersViewRES>> GetAllProfiles()
         {
             return Ok(await _profile.GetAllProfiles());
@@ -83,7 +83,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <param name="department"></param>
         /// <returns></returns>
-        [Authorize(Roles = nameof(Roles.Supper))]
+        //[Authorize(Roles = nameof(Roles.Supper))]
         [HttpPost, Route("CreatDepartment")]
         public async Task<ActionResult> CreatDepartments([FromBody] DepartmentView department)
         {
@@ -97,7 +97,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <param name="profileView"></param>
         /// <returns></returns>
-        [Authorize(Roles = nameof(Roles.Supper))]
+        //[Authorize(Roles = nameof(Roles.Supper))]
         [HttpPost, Route("CreatProfile")]
         public async Task<ActionResult> CreatProfile([FromForm] ProfileView profileView)
         {

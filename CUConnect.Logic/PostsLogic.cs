@@ -72,13 +72,13 @@ namespace CUConnect.Logic
 
         public async Task<List<PostViewRES>> GetPosts(int profileId)
         {
-            //var user = await _userManager.FindByEmailAsync(Email);
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
-                //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
                 return await _dbContext.Profiles
                     .Include(y => y.Posts)
                     .ThenInclude(z => z.Documents)
@@ -97,7 +97,7 @@ namespace CUConnect.Logic
                          PostsCreatedOn = z.PostedOn,
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
-                             Path = host + x.Name
+                             Path = x.Path
                          }).ToList()
 
                      }).ToListAsync();
@@ -107,10 +107,11 @@ namespace CUConnect.Logic
 
         public async Task<ActionResult<PostViewRES>> GetPost(int postId)
         {
-            //var user = await _userManager.FindByEmailAsync(Email);
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
                 //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
@@ -125,7 +126,7 @@ namespace CUConnect.Logic
                          PostsCreatedOn = z.PostedOn,
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
-                             Path = host + x.Name
+                             Path = x.Path
                          }).ToList()
 
                      }).FirstOrDefaultAsync();

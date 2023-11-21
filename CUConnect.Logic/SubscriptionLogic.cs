@@ -148,10 +148,12 @@ namespace CUConnect.Logic
 
         public async Task<List<PostViewRES>> GetSubscribedProfilePosts(string Email)
         {
+            //Only use(host) when the files are on same server wwwroot
             var user = await _userManager.FindByEmailAsync(Email);
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
 
@@ -172,7 +174,7 @@ namespace CUConnect.Logic
                          ProfileTitle = y.profiles.Title,
                          CoverPicture = y.profiles.Documents
                                          .Where(doc => doc.ProfileId.Equals(z.ProfileId))
-                                         .Select(doc => new Cover() { ProfileImage = host + doc.Name })
+                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
                                          .FirstOrDefault(),
 
                          PostID = z.PostId,
@@ -182,7 +184,7 @@ namespace CUConnect.Logic
                          TotalReactions = z.Reactions.Select(r => r.PostsId.Equals(r.PostsId)).Count(),
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
-                             Path = host + x.Name
+                             Path = x.Path
                          }).ToList()
 
                      }).OrderByDescending(p => p.TotalReactions)

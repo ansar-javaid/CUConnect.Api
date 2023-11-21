@@ -10,7 +10,7 @@ namespace CUConnect.Api.Controllers
 {
     [Route("api/subscription")]
     [ApiController]
-    [Authorize(Roles = nameof(Roles.User))]
+    //[Authorize(Roles = nameof(Roles.User))]
     public class SubscriptionController : ControllerBase
     {
         private readonly ISubscriptionREPO _subscription;

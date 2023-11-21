@@ -158,31 +158,17 @@ namespace CUConnect.Logic
                                         })
                                         .ToListAsync();
             }
-
-
-            //return await (from user in _dbContext.AspNetUsers
-            //             join claim in _dbContext.AspNetUserClaims
-            //             on user.Id equals claim.UserId
-            //             on user.Id equals claim.UserId
-            //             where claim.ClaimValue.Equals(nameof(Roles.User))
-            //             select new RegisteredUsersViewRES
-            //             {
-            //                 Email = user.Email,
-            //                 FirstName = user.FirstName,
-            //                 LastName = user.LastName,
-            //                 JoinedOn = user.UserJoined,
-            //                 UserRole = claim.ClaimValue
-            //             }).ToListAsync();
-
         }
 
 
 
         public async Task<ProfileOnlyViewRES> GetProfileOnly(int profileId)
         {
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
                 return await (from x in _dbContext.Profiles
@@ -193,7 +179,7 @@ namespace CUConnect.Logic
                                   ProfileID = x.ProfileId,
                                   ProfileTitle = x.Title,
                                   ProfileDescription = x.Description,
-                                  Path = host + x.Documents.FirstOrDefault().Name // Include the related Document entity
+                                  Path =  x.Documents.FirstOrDefault().Path // Include the related Document entity
                               }).FirstOrDefaultAsync();
 
             }
@@ -202,9 +188,11 @@ namespace CUConnect.Logic
 
         public async Task<List<ProfileOnlyViewRES>> GetAllProfiles()
         {
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
                 return await _dbContext.Profiles
@@ -215,7 +203,7 @@ namespace CUConnect.Logic
                         ProfileID = x.ProfileId,
                         ProfileTitle = x.Title,
                         ProfileDescription = x.Description,
-                        Path = host + x.Documents.FirstOrDefault().Name // Include the related Document entity
+                        Path = x.Documents.FirstOrDefault().Path // Include the related Document entity
                     }).ToListAsync();
 
             }

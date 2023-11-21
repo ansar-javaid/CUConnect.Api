@@ -1,4 +1,6 @@
 ﻿using CUConnect.Database.Entities;
+using Firebase.Auth;
+using Firebase.Storage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +12,13 @@ namespace CUConnect.Logic
     public class FileUploadLogic : ControllerBase
     {
         private readonly IHostEnvironment _environment;
+        //FireBase Storage Variables
+        private static readonly string _ApiKey = "AIzaSyA9t7uK2c4TeqPGDOPM1_bz8OH9V7xI5Yw";
+        private static readonly string _Bucket = "ai-connect-c7217.appspot.com";
+        private static readonly string _AuthEmail = "eno.j5566@gmail.com";
+        private static readonly string _AuthPassword = "Cortana$5566";
+        private static readonly string _FileBaseURL = "https://firebasestorage.googleapis.com/v0/b/ai-connect-c7217.appspot.com/o/";
+
         public FileUploadLogic(IHostEnvironment environment)
         {
             _environment = environment;
@@ -49,6 +58,8 @@ namespace CUConnect.Logic
             return imageExtensions.Contains(fileExtension.ToLowerInvariant());
         }
 
+
+        #region FireBase Cloud Upload & Image Size Reducer
         private async Task SizeReducer(IFormFile file, string rootPath, Post? post, Profile? profile)
         {
 
@@ -87,7 +98,7 @@ namespace CUConnect.Logic
                     {
                         image.Save(memoryStream, new JpegEncoder
                         {
-                            Quality = 80 // adjust the quality level here
+                            Quality = 90 // adjust the quality level here
                         });
 
                         // Save the compressed image to the file system
@@ -95,6 +106,48 @@ namespace CUConnect.Logic
                         {
                             memoryStream.Seek(0, SeekOrigin.Begin);
                             await memoryStream.CopyToAsync(fileStream);
+
+                            //Fire Base Cloud Upload Code
+                            {
+                                // Reset the stream position
+                                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                                var auth = new FirebaseAuthProvider(new FirebaseConfig(_ApiKey));
+                                var a = await auth.SignInWithEmailAndPasswordAsync(_AuthEmail, _AuthPassword);
+
+                                var cancellation = new CancellationTokenSource();
+
+                                var task = new FirebaseStorage(
+                                    _Bucket,
+                                    new FirebaseStorageOptions
+                                    {
+                                        AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
+                                        ThrowOnCancel = true
+                                    })
+                                    .Child(uniqueFileName)
+                                    .PutAsync(memoryStream, cancellation.Token);
+
+                                task.Progress.ProgressChanged += (s, e) => Console.WriteLine($"Progress: {e.Percentage} %");
+
+
+                                try
+                                {
+                                    await task;
+                                    // Delete the file from the local disk after a successful upload
+                                    // Dispose of the FileStream when it's no longer needed
+                                    memoryStream.Dispose();
+                                    fileStream.Dispose();
+
+                                    // Delete the file from the local disk after a successful upload
+                                    System.IO.File.Delete(filePath);
+
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.WriteLine(ex.Message);
+                                }
+                            }
+
                         }
                     }
                 }
@@ -105,6 +158,42 @@ namespace CUConnect.Logic
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(fileStream);
+                    // Reset the stream position
+                    fileStream.Seek(0, SeekOrigin.Begin);
+
+                    var auth = new FirebaseAuthProvider(new FirebaseConfig(_ApiKey));
+                    var a = await auth.SignInWithEmailAndPasswordAsync(_AuthEmail, _AuthPassword);
+
+                    var cancellation = new CancellationTokenSource();
+
+                    var task = new FirebaseStorage(
+                        _Bucket,
+                        new FirebaseStorageOptions
+                        {
+                            AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
+                            ThrowOnCancel = true
+                        })
+                        .Child(uniqueFileName)
+                        .PutAsync(fileStream, cancellation.Token);
+
+                    task.Progress.ProgressChanged += (s, e) => Console.WriteLine($"Progress: {e.Percentage} %");
+
+
+                    try
+                    {
+                        await task;
+                        // Delete the file from the local disk after a successful upload
+                        // Dispose of the FileStream when it's no longer needed
+                        fileStream.Dispose();
+
+                        // Delete the file from the local disk after a successful upload
+                        System.IO.File.Delete(filePath);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
             }
 
@@ -120,7 +209,7 @@ namespace CUConnect.Logic
                         Name = uniqueFileName,
                         FamilyType = fileExtension,
                         MimeType = fileExtension,
-                        Path = $"/Resources/Document/{uniqueFileName}"
+                        Path = _FileBaseURL + uniqueFileName + "?alt=media"
                     };
 
                     _dbContext.Documents.Add(document);
@@ -135,7 +224,7 @@ namespace CUConnect.Logic
                         Name = uniqueFileName,
                         FamilyType = fileExtension,
                         MimeType = fileExtension,
-                        Path = $"/Resourses/Document/{uniqueFileName}"
+                        Path = _FileBaseURL + uniqueFileName + "?alt=media"
                     };
                     _dbContext.Documents.Add(document);
                     await _dbContext.SaveChangesAsync();
@@ -145,7 +234,7 @@ namespace CUConnect.Logic
             // Update the total size of the uploaded files
             //size += new FileInfo(filePath).Length;
         }
-
+        #endregion
 
         public Task<(bool status, double size)> Upload(IFormFile file, Profile profile)
         {

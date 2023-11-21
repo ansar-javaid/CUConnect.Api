@@ -65,7 +65,7 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <param name="postsView"></param>
         /// <returns></returns>
-        [Authorize(Roles = nameof(Roles.Admin))]
+       // [Authorize(Roles = nameof(Roles.Admin))]
         [HttpPost, Route("CreatePost")]
         public async Task<IActionResult> CreatePost([FromForm] PostsView postsView)
         {
