@@ -10,6 +10,7 @@ namespace CUConnect.Models.Repository
         public Task<IActionResult> ReactOnPost(ReactionView reactionView);
         public Task<IActionResult> ProfileStatus(SubscriptionView subscriptionView);
         public Task<IActionResult> ReactionStatus(ReactionView reactionView);
-        public Task<List<PostViewRES>> GetSubscribedProfilePosts(string Email);
+        public Task<List<PostViewRES>> GetSubscribedPosts(string Email,int page);
+        public Task<List<PostViewRES>> GetSubscribedProfilePosts(int profileId,string Email,int page);
     }
 }

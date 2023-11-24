@@ -146,7 +146,9 @@ namespace CUConnect.Logic
         #endregion
         //=====================================================================================================================================================
 
-        public async Task<List<PostViewRES>> GetSubscribedProfilePosts(string Email)
+        #region Subscribed Posts
+        //=====================================================================================================================================================
+        public async Task<List<PostViewRES>> GetSubscribedPosts(string Email, int page)
         {
             //Only use(host) when the files are on same server wwwroot
             var user = await _userManager.FindByEmailAsync(Email);
@@ -154,10 +156,11 @@ namespace CUConnect.Logic
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
 
+
+            var pageSize = 3;
             using (var _dbContext = new CUConnectDBContext())
             {
-
-                var profile = await _dbContext.Profiles
+                var profileQuery = _dbContext.Profiles
                     .Include(x => x.Subscriptions)
                     .Include(y => y.Posts).ThenInclude(z => z.Documents)
                     .Include(x => x.Posts).ThenInclude(r => r.Reactions)
@@ -165,33 +168,94 @@ namespace CUConnect.Logic
                     {
                         profiles = x,
                         data = x.Subscriptions
-                                .Where(n => n.UserId.Equals(user.Id))//filter subscription node for:id
+                                .Where(n => n.UserId.Equals(user.Id)) // filter subscription node for:id
                                 .Select(y => y.ProfileId)
                     })
-                     .SelectMany(z => z.profiles.Posts.Where(i => z.data.Any(c => c == i.ProfileId)), (y, z) => new PostViewRES()
-                     {
-                         ProfileID = y.profiles.ProfileId,
-                         ProfileTitle = y.profiles.Title,
-                         CoverPicture = y.profiles.Documents
-                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
-                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
-                                         .FirstOrDefault(),
+                    .SelectMany(z => z.profiles.Posts.Where(i => z.data.Any(c => c == i.ProfileId)), (y, z) => new PostViewRES()
+                    {
+                        ProfileID = y.profiles.ProfileId,
+                        ProfileTitle = y.profiles.Title,
+                        CoverPicture = y.profiles.Documents
+                                        .Where(doc => doc.ProfileId.Equals(z.ProfileId))
+                                        .Select(doc => new Cover() { ProfileImage = doc.Path })
+                                        .FirstOrDefault(),
 
-                         PostID = z.PostId,
-                         PostDescription = z.Description,
-                         PostsCreatedOn = z.PostedOn,
-                         Reaction = z.Reactions.Any(r => r.UserId == user.Id),
-                         TotalReactions = z.Reactions.Select(r => r.PostsId.Equals(r.PostsId)).Count(),
-                         FilePath = z.Documents.Select(x => new PostViewRES.Files()
-                         {
-                             Path = x.Path
-                         }).ToList()
+                        PostID = z.PostId,
+                        PostDescription = z.Description,
+                        PostsCreatedOn = z.PostedOn,
+                        Reaction = z.Reactions.Any(r => r.UserId == user.Id),
+                        TotalReactions = z.Reactions.Count(),
+                        FilePath = z.Documents.Select(x => new PostViewRES.Files()
+                        {
+                            Path = x.Path
+                        }).ToList()
 
-                     }).OrderByDescending(p => p.TotalReactions)
-                       .ToListAsync();
-                return profile;
+                    }).OrderByDescending(p => p.TotalReactions);
+
+                // Apply pagination
+                var paginatedProfile = await profileQuery.Skip((page - 1) * pageSize)
+                                                        .Take(pageSize)
+                                                        .ToListAsync();
+
+                return paginatedProfile;
             }
         }
+        #endregion
+        //=====================================================================================================================================================
+
+        #region Subscribed Profile Posts
+        //=====================================================================================================================================================
+        public async Task<List<PostViewRES>> GetSubscribedProfilePosts(int profileId, string Email, int page)
+        {
+            //Only use(host) when the files are on same server wwwroot
+            var user = await _userManager.FindByEmailAsync(Email);
+            IHttpContextAccessor httpContext = new HttpContextAccessor();
+            var request = httpContext.HttpContext.Request;
+            var host = $"{request.Scheme}://{request.Host}/files/";
+
+
+            var pageSize = 3;
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                var profileQuery = _dbContext.Profiles
+                    .Include(y => y.Posts).ThenInclude(z => z.Documents)
+                    .Include(x => x.Posts).ThenInclude(r => r.Reactions)
+                    .Select(x => new
+                    {
+                        profiles = x,
+                        data = x.Posts.Where(i=>i.ProfileId.Equals(profileId))
+                                      .Select(y => y.Profile)  // filter subscription node for:id
+                    })
+                    .SelectMany(z => z.profiles.Posts.Where(i => z.data.Any(c => c == i.Profile)), (y, z) => new PostViewRES()
+                    {
+                        ProfileID = y.profiles.ProfileId,
+                        ProfileTitle = y.profiles.Title,
+                        CoverPicture = y.profiles.Documents
+                                        .Where(doc => doc.ProfileId.Equals(z.ProfileId))
+                                        .Select(doc => new Cover() { ProfileImage = doc.Path })
+                                        .FirstOrDefault(),
+
+                        PostID = z.PostId,
+                        PostDescription = z.Description,
+                        PostsCreatedOn = z.PostedOn,
+                        Reaction = z.Reactions.Any(r => r.UserId.Equals(user.Id)),
+                        TotalReactions = z.Reactions.Count(),
+                        FilePath = z.Documents.Select(x => new PostViewRES.Files()
+                        {
+                            Path = x.Path
+                        }).ToList()
+
+                    }).OrderByDescending(p => p.TotalReactions);
+
+                // Apply pagination
+                var paginatedProfile = await profileQuery.Skip((page - 1) * pageSize)
+                                                        .Take(pageSize)
+                                                        .ToListAsync();
+
+                return paginatedProfile;
+            }
+        }
+        #endregion
         //=====================================================================================================================================================
     }
 }
