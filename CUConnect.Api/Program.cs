@@ -6,7 +6,6 @@ using CUConnect.Models.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -164,12 +163,12 @@ app.UseHttpsRedirection();
 app.UseCors("EnableCORS");
 
 app.UseRouting();
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Resources", "Document")),
-    RequestPath = "/files"
-});
+//app.UseStaticFiles(new StaticFileOptions
+//{
+//    FileProvider = new PhysicalFileProvider(
+//        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Resources", "Document")),
+//    RequestPath = "/files"
+//});
 
 app.UseAuthentication();
 app.UseAuthorization();
