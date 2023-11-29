@@ -4,6 +4,7 @@ using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace CUConnect.Api.Controllers
 {
@@ -29,6 +30,7 @@ namespace CUConnect.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet, Route("GetPostsByProfile")]
+
         public async Task<ActionResult<List<PostViewRES>>> GetPostsById(int id)
         {
             var result = await _post.GetPosts(id);
@@ -47,6 +49,7 @@ namespace CUConnect.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet, Route("GetPostbyId")]
+        [Authorize(Roles = nameof(Roles.Admin))]
         public async Task<ActionResult<List<PostViewRES>>> GetPostById(int id)
         {
             var result = await _post.GetPost(id);
@@ -65,12 +68,25 @@ namespace CUConnect.Api.Controllers
         /// </summary>
         /// <param name="postsView"></param>
         /// <returns></returns>
-        [Authorize(Roles = nameof(Roles.Admin))]
+       // [Authorize(Roles = nameof(Roles.Admin))]
         [HttpPost, Route("CreatePost")]
-        public async Task<IActionResult> CreatePost([FromForm] PostsView postsView)
+        public async Task<ActionResult> CreatePost([FromForm] PostsView postsView)
         {
-            var result = await _post.CreatPost(postsView);
-            return Ok(result);
+            return Ok(await _post.CreatPost(postsView));
+        }
+
+
+
+
+        /// <summary>
+        /// Deletes a post by accpeting the PostId for the associated Post
+        /// </summary>
+        /// <param name="postId"></param>
+        /// <returns></returns>
+        [HttpDelete, Route("DeletePost")]
+        public async Task<ActionResult> DeletePost([Required][FromQuery] int postId)
+        {
+            return Ok(await _post.DeletePost(postId));
         }
 
         #endregion

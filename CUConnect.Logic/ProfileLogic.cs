@@ -27,9 +27,6 @@ namespace CUConnect.Logic
 
 
 
-
-
-
         #region All Departments
         public async Task<List<DepartmentViewRES>> GetAllDepartment()
         {
@@ -90,7 +87,7 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
-                            await MakeAdmin(user);
+                            await MakeAdminFromUser(user);
                             var result = await _fileUploadLogic.Upload(profileView.File, profile);
                             return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Admin", Uploaded = result.status });
                         }
@@ -108,7 +105,7 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
-                            await MakeAdmin(user);
+                            await MakeAdminFromUser(user);
                             var result = await _fileUploadLogic.Upload(profileView.File, profile);
                             return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Department", Uploaded = result.status });
                         }
@@ -127,7 +124,7 @@ namespace CUConnect.Logic
                             };
                             _dbContext.Profiles.Add(profile);
                             await _dbContext.SaveChangesAsync();
-                            await MakeAdmin(user);
+                            await MakeAdminFromUser(user);
                             var result = await _fileUploadLogic.Upload(profileView.File, profile);
                             return StatusCode(StatusCodes.Status201Created, new { Status = "Success", For = profileView.Email, Level = "Cr", Uploaded = result.status });
                         }
@@ -158,31 +155,42 @@ namespace CUConnect.Logic
                                         })
                                         .ToListAsync();
             }
-
-
-            //return await (from user in _dbContext.AspNetUsers
-            //             join claim in _dbContext.AspNetUserClaims
-            //             on user.Id equals claim.UserId
-            //             on user.Id equals claim.UserId
-            //             where claim.ClaimValue.Equals(nameof(Roles.User))
-            //             select new RegisteredUsersViewRES
-            //             {
-            //                 Email = user.Email,
-            //                 FirstName = user.FirstName,
-            //                 LastName = user.LastName,
-            //                 JoinedOn = user.UserJoined,
-            //                 UserRole = claim.ClaimValue
-            //             }).ToListAsync();
-
         }
+        //---------------------------------------------------------------------------------------------------------------------------
 
+        public async Task<List<ProfileAdminViewRES>> GetProfileAdminUsers()
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+
+                return await _dbContext.AspNetUsers
+                                        .Include(u => u.AspNetUserClaims)
+                                        .Include(p => p.Profiles)
+                                        .Where(u => u.AspNetUserClaims.Any(c => c.ClaimValue.Equals(nameof(Roles.Admin)))) //for Admin
+                                        .Select(u => new ProfileAdminViewRES
+                                        {
+                                            ProfileDetail = u.Profiles.Select(d => new ProfileDetail
+                                            {
+                                                ProfileId = d.ProfileId,
+                                                ProfileTitle = d.Title,
+                                            }).First(),
+                                            Email = u.Email,
+                                            Name = u.FirstName +" "+ u.LastName,
+                                            UserRole = u.AspNetUserClaims.FirstOrDefault(c => c.ClaimValue.Equals(nameof(Roles.Admin))).ClaimValue //for Admin
+                                        })
+                                        .ToListAsync();
+            }
+        }
+        //---------------------------------------------------------------------------------------------------------------------------
 
 
         public async Task<ProfileOnlyViewRES> GetProfileOnly(int profileId)
         {
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
                 return await (from x in _dbContext.Profiles
@@ -193,7 +201,7 @@ namespace CUConnect.Logic
                                   ProfileID = x.ProfileId,
                                   ProfileTitle = x.Title,
                                   ProfileDescription = x.Description,
-                                  Path = host + x.Documents.FirstOrDefault().Name // Include the related Document entity
+                                  Path = x.Documents.FirstOrDefault().Path // Include the related Document entity
                               }).FirstOrDefaultAsync();
 
             }
@@ -202,9 +210,11 @@ namespace CUConnect.Logic
 
         public async Task<List<ProfileOnlyViewRES>> GetAllProfiles()
         {
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
                 return await _dbContext.Profiles
@@ -215,16 +225,64 @@ namespace CUConnect.Logic
                         ProfileID = x.ProfileId,
                         ProfileTitle = x.Title,
                         ProfileDescription = x.Description,
-                        Path = host + x.Documents.FirstOrDefault().Name // Include the related Document entity
+                        Path = x.Documents.FirstOrDefault().Path // Include the related Document entity
                     }).ToListAsync();
 
             }
         }
+        //---------------------------------------------------------------------------------------------------------------------------
+
+        #region Admin Chnage Method
+        public async Task<IActionResult> ChangeProfileAdmin(string existingEmail, string newEmail)
+        {
+            var currentAdmin = await _userManager.FindByEmailAsync(existingEmail);
+            var newAdmin = await _userManager.FindByEmailAsync(newEmail);
+
+            //Check if Admin User Exist
+            if (currentAdmin == null)
+                return StatusCode(StatusCodes.Status404NotFound, new { Status = "Admin with provided email not found!", For = existingEmail });
+            //Check if User Exit
+            if (newAdmin == null)
+                return StatusCode(StatusCodes.Status404NotFound, new { Status = "User not found! Please register first.", For = newEmail });
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                //Query for Profile finding
+                var profile = _dbContext.Profiles.Where(x => x.UserId.Equals(currentAdmin.Id)).FirstOrDefault();
+
+                //Check if no Profile Found
+                if (profile == null)
+                    return StatusCode(StatusCodes.Status404NotFound, new { Status = "No current profile found", For = existingEmail });
+
+                //Check if new Email already have an associated Profile
+                if (_dbContext.Profiles.Where(x => x.UserId.Equals(newAdmin.Id)).FirstOrDefault() != null)
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Status = "New Email/User already have an associated Profile, User Cant have another Profile", For = newEmail });
+
+                try
+                {
+                    //Perform User change here: assign new user id by replacing the previous one
+                    profile.UserId = newAdmin.Id;
+                    _dbContext.Attach(profile).State = EntityState.Modified;
+                    await _dbContext.SaveChangesAsync();
+                    //Chnage new User role from User to Admin
+                    await MakeAdminFromUser(newAdmin);
+                    //Chnage the existing/Previous user role from Admin to User
+                    await MakeUserFromAdmin(currentAdmin);
+
+                    return StatusCode(StatusCodes.Status200OK, new { Status = "Admin Chnaged", New = newEmail, Previous = existingEmail });
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode(StatusCodes.Status400BadRequest, new { Status = "Something went wrong!", Error = ex });
+                }
 
 
+            }
+        }
+        #endregion
 
 
-        private async Task MakeAdmin(AppUser user)
+        #region Role Chainging Methods
+        private async Task MakeAdminFromUser(AppUser user)
         {
             // Remove the existing claim from the user
             var existingClaims = await _userManager.GetClaimsAsync(user);
@@ -242,6 +300,26 @@ namespace CUConnect.Logic
             // Add a new claim to the user
             await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, Roles.Admin.ToString()));
         }
+        //----------------------------------------------------------------------------------------------------------------------
+        private async Task MakeUserFromAdmin(AppUser user)
+        {
+            // Remove the existing claim from the user
+            var existingClaims = await _userManager.GetClaimsAsync(user);
+            if (existingClaims != null && existingClaims.Count > 0)
+            {
+                foreach (var claim in existingClaims)
+                {
+                    if (claim.Type == ClaimTypes.Role && claim.Value == Roles.Admin.ToString())
+                    {
+                        await _userManager.RemoveClaimAsync(user, claim);
+                    }
+                }
+            }
+
+            // Add a new claim to the user
+            await _userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, Roles.User.ToString()));
+        }
+        #endregion
 
     }
 }

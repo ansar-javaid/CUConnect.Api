@@ -10,7 +10,7 @@ namespace CUConnect.Api.Controllers
 {
     [Route("api/subscription")]
     [ApiController]
-    [Authorize(Roles = nameof(Roles.User))]
+    //[Authorize(Roles = nameof(Roles.User))]
     public class SubscriptionController : ControllerBase
     {
         private readonly ISubscriptionREPO _subscription;
@@ -78,15 +78,34 @@ namespace CUConnect.Api.Controllers
 
 
         /// <summary>
-        /// Returns all the posts of a profile for a user, which user has subscribed/following
+        /// Returns all the posts of subscribed profiles for a user, which user has subscribed/following. Pass the page number for Data pagination
         /// </summary>
         /// <param name="Email"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
+        [HttpGet, Route("SubscribedPosts")]
+        public async Task<ActionResult<ProfileViewRES>> SubscribedPosts([FromQuery][EmailAddress] string Email,[FromQuery] int page)
+        {
+            var result = await _subscription.GetSubscribedPosts(Email,page);
+            return Ok(result);
+        }
+
+
+
+        /// <summary>
+        /// Returns Only the Posts of A Specific Specific Profile, with Reactions on the Post, returns all the posts with the Post-Id and reactions,
+        /// with Email. Pass the page number for Data pagination.
+        /// </summary>
+        /// <param name="profileId"></param>
+        /// <param name="Email"></param>
+        /// <param name="page"></param>
         /// <returns></returns>
         [HttpGet, Route("SubscribedProfilePosts")]
-        public async Task<ActionResult<ProfileViewRES>> SubscribedProfilePosts([FromQuery][EmailAddress] string Email)
+        public async Task<ActionResult<ProfileViewRES>> SubscribedProfilePosts([FromQuery] int profileId, [FromQuery][EmailAddress] string Email, [FromQuery] int page)
         {
-            var result = await _subscription.GetSubscribedProfilePosts(Email);
+            var result = await _subscription.GetSubscribedProfilePosts(profileId, Email, page);
             return Ok(result);
         }
     }
+
 }

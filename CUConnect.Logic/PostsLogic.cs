@@ -29,6 +29,7 @@ namespace CUConnect.Logic
         }
 
 
+        #region CREATE Post
         public async Task<IActionResult> CreatPost(PostsView postsView)
         {
             if (postsView.ProfileID < 0 || postsView.Description == null)
@@ -50,8 +51,8 @@ namespace CUConnect.Logic
 
                 }
             }
-            if (postsView.Files.Count > 5)
-                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Files Limit Excedded: 5 allowed", FileUploaded = false });
+            if (postsView.Files.Count > 8)
+                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Files Limit Excedded: 8 allowed", FileUploaded = false });
             using (var _dbContext = new CUConnectDBContext())
             {
                 var post = new Post()
@@ -67,18 +68,34 @@ namespace CUConnect.Logic
                 return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles = result.totalFiles, Size = result.size });
             }
         }
+        #endregion
+
+        #region DELETE Post
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                var post = await _dbContext.Posts.FindAsync(postId);
+                if (post == null)
+                    return StatusCode(StatusCodes.Status404NotFound, new { Status = "Post with associated Id not found!" });
+                _dbContext.Posts.Remove(post);
+                await _dbContext.SaveChangesAsync();
+                return StatusCode(StatusCodes.Status200OK, new { Status = "Post Deleted!" });
+            }
+        }
+        #endregion
 
 
 
         public async Task<List<PostViewRES>> GetPosts(int profileId)
         {
-            //var user = await _userManager.FindByEmailAsync(Email);
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
-                //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
                 return await _dbContext.Profiles
                     .Include(y => y.Posts)
                     .ThenInclude(z => z.Documents)
@@ -89,7 +106,7 @@ namespace CUConnect.Logic
                          ProfileTitle = y.Title,
                          CoverPicture = y.Documents
                                          .Where(doc => doc.ProfileId.Equals(z.ProfileId))
-                                         .Select(doc => new Cover() { ProfileImage = host + doc.Name })
+                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
                                          .FirstOrDefault(),
 
                          PostID = z.PostId,
@@ -97,7 +114,7 @@ namespace CUConnect.Logic
                          PostsCreatedOn = z.PostedOn,
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
-                             Path = host + x.Name
+                             Path = x.Path
                          }).ToList()
 
                      }).ToListAsync();
@@ -107,10 +124,11 @@ namespace CUConnect.Logic
 
         public async Task<ActionResult<PostViewRES>> GetPost(int postId)
         {
-            //var user = await _userManager.FindByEmailAsync(Email);
+            //Only use(host) when the files are on same server wwwroot
             IHttpContextAccessor httpContext = new HttpContextAccessor();
             var request = httpContext.HttpContext.Request;
             var host = $"{request.Scheme}://{request.Host}/files/";
+
             using (var _dbContext = new CUConnectDBContext())
             {
                 //var profile = await _dbContext.Profiles.Where(x => x.ProfileId == profileId).Include(x => x.Posts).ToListAsync();
@@ -125,7 +143,7 @@ namespace CUConnect.Logic
                          PostsCreatedOn = z.PostedOn,
                          FilePath = z.Documents.Select(x => new PostViewRES.Files()
                          {
-                             Path = host + x.Name
+                             Path = x.Path
                          }).ToList()
 
                      }).FirstOrDefaultAsync();
