@@ -29,6 +29,7 @@ namespace CUConnect.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet, Route("GetPostsByProfile")]
+
         public async Task<ActionResult<List<PostViewRES>>> GetPostsById(int id)
         {
             var result = await _post.GetPosts(id);
@@ -47,6 +48,7 @@ namespace CUConnect.Api.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet, Route("GetPostbyId")]
+        [Authorize(Roles = nameof(Roles.Admin))]
         public async Task<ActionResult<List<PostViewRES>>> GetPostById(int id)
         {
             var result = await _post.GetPost(id);

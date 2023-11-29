@@ -29,7 +29,7 @@ namespace CUConnect.Api.Controllers
 
 
         /// <summary>
-        /// Return JWT Token, with Email, Name, UserData=ProfileID (if -1 then No Profile is created yet), and with User Role
+        /// Return JWT Token, with Email, Name, ProfileID=ProfileID (if -1 then No Profile is created yet), and with User Role
         /// 
         /// Decode it inside the code, Help jwt.io
         /// </summary>

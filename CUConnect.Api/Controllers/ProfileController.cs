@@ -6,6 +6,7 @@ using CUConnect.Models.ResponseModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 
 namespace CUConnect.Api.Controllers
 {
@@ -26,7 +27,7 @@ namespace CUConnect.Api.Controllers
 
 
         /// <summary>
-        /// Returns the list of All departments from Database
+        /// Returns the list of All departments from Database : Role Super
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("GetAllDepartment")]
@@ -55,23 +56,38 @@ namespace CUConnect.Api.Controllers
         //-----------------------------------------------------------------------------------------
 
         /// <summary>
-        /// This return the list of all users, available for profile registration/association.
+        /// This return the list of all users, available for profile registration/association. : Role Super
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("AvailableUsers")]
-       // [Authorize(Roles = nameof(Roles.Supper))]
+        // [Authorize(Roles = nameof(Roles.Supper))]
         public async Task<ActionResult<RegisteredUsersViewRES>> GetRegisteredUsers()
         {
             return Ok(await _profile.GetRegisteredUsers());
         }
 
 
+
+
+
         /// <summary>
-        /// Retuen the list off all Profiles, registered in System.
+        /// This return the list of all users, Using an assigned Profile. : Role Super
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("ProfileAdminUsers")]
+        // [Authorize(Roles = nameof(Roles.Supper))]
+        public async Task<ActionResult<ProfileAdminViewRES>> GetProfileAdminUsers()
+        {
+            return Ok(await _profile.GetProfileAdminUsers());
+        }
+
+
+        /// <summary>
+        /// Retuen the list off all Profiles, registered in System. : Role Super, User
         /// </summary>
         /// <returns></returns>
         [HttpGet, Route("GetAllProfiles")]
-       // [Authorize(Roles = nameof(Roles.User))]
+        // [Authorize(Roles = nameof(Roles.User))]
         public async Task<ActionResult<RegisteredUsersViewRES>> GetAllProfiles()
         {
             return Ok(await _profile.GetAllProfiles());
@@ -79,7 +95,7 @@ namespace CUConnect.Api.Controllers
 
 
         /// <summary>
-        /// First Create Departments i.e (Computer Science, Electical Engeniering, Adminstration, Accounts)
+        /// First Create Departments i.e (Computer Science, Electical Engeniering, Adminstration, Accounts) : Role Super
         /// </summary>
         /// <param name="department"></param>
         /// <returns></returns>
@@ -93,7 +109,7 @@ namespace CUConnect.Api.Controllers
 
         /// <summary>
         /// After Creating Departments, create Profile under that Department by selecting the department name using a registered user
-        /// email. i.e (department of Computer Science, IEEE, Accounts Office, Clasees BCS-1A, BCS-8A)
+        /// email. i.e (department of Computer Science, IEEE, Accounts Office, Clasees BCS-1A, BCS-8A) : Role Super
         /// </summary>
         /// <param name="profileView"></param>
         /// <returns></returns>
@@ -104,6 +120,22 @@ namespace CUConnect.Api.Controllers
             return Ok(await _profile.CreatProfile(profileView));
         }
 
+
+
+
+
+        /// <summary>
+        /// This Chnages the Profile Admin/User. Pass it an axisting email of associated User(Currently Admin) and a new email of a normal user(Currently User) : Role Super
+        /// </summary>
+        /// <param name="existingEmail"></param>
+        /// <param name="newEmail"></param>
+        /// <returns></returns>
+        //[Authorize(Roles = nameof(Roles.Supper))]
+        [HttpPatch, Route("ChangeProfileAdmin")]
+        public async Task<ActionResult> ChangeProfileAdmin([FromQuery] string existingEmail, [FromQuery] string newEmail)
+        {
+            return Ok(await _profile.ChangeProfileAdmin(existingEmail, newEmail));
+        }
 
 
     }

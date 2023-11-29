@@ -90,9 +90,9 @@ namespace CUConnect.Logic
 
             List<Claim> claims = new List<Claim>();
 
-            claims.Add(new Claim(ClaimTypes.Email, user.UserName));
-            claims.Add(new Claim(ClaimTypes.Name, user.FirstName));
-            claims.Add(new Claim(ClaimTypes.UserData, profileID.ToString()));
+            claims.Add(new Claim("Email", user.UserName));
+            claims.Add(new Claim("Name", user.FirstName));
+            claims.Add(new Claim("Profile", profileID.ToString()));
             foreach (var claimItem in claim)
                 claims.Add(new Claim(ClaimTypes.Role, claimItem.Value));
 
@@ -102,7 +102,7 @@ namespace CUConnect.Logic
                 issuer: _configuration.GetSection("JsonWebTokenKeys:ValidIssuer").Value,
                 audience: _configuration.GetSection("JsonWebTokenKeys:ValidAudience").Value,
                 claims: claims,
-                expires: DateTime.Now.AddHours(8),
+                expires: DateTime.Now.AddDays(14),
                 signingCredentials: cred
                 );
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);

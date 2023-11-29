@@ -50,8 +50,8 @@ namespace CUConnect.Logic
 
                 }
             }
-            if (postsView.Files.Count > 5)
-                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Files Limit Excedded: 5 allowed", FileUploaded = false });
+            if (postsView.Files.Count > 8)
+                return StatusCode(StatusCodes.Status400BadRequest, new { Status = false, Msg = "Files Limit Excedded: 8 allowed", FileUploaded = false });
             using (var _dbContext = new CUConnectDBContext())
             {
                 var post = new Post()
