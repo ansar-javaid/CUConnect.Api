@@ -15,5 +15,9 @@ namespace CUConnect.Models.Repository
         public Task<IActionResult> CreatPost(PostsView postsView);
         #endregion
 
+        #region DELETE Methods
+        public Task<IActionResult> DeletePost(int postId);
+        #endregion
+
     }
 }

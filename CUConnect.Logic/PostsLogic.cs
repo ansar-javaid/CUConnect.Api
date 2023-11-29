@@ -29,6 +29,7 @@ namespace CUConnect.Logic
         }
 
 
+        #region CREATE Post
         public async Task<IActionResult> CreatPost(PostsView postsView)
         {
             if (postsView.ProfileID < 0 || postsView.Description == null)
@@ -67,6 +68,22 @@ namespace CUConnect.Logic
                 return StatusCode(StatusCodes.Status201Created, new { Status = result.status, FileUploaded = result.status, TotalFiles = result.totalFiles, Size = result.size });
             }
         }
+        #endregion
+
+        #region DELETE Post
+        public async Task<IActionResult> DeletePost(int postId)
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                var post = await _dbContext.Posts.FindAsync(postId);
+                if (post == null)
+                    return StatusCode(StatusCodes.Status404NotFound, new { Status = "Post with associated Id not found!" });
+                _dbContext.Posts.Remove(post);
+                await _dbContext.SaveChangesAsync();
+                return StatusCode(StatusCodes.Status200OK, new { Status = "Post Deleted!" });
+            }
+        }
+        #endregion
 
 
 
@@ -89,7 +106,7 @@ namespace CUConnect.Logic
                          ProfileTitle = y.Title,
                          CoverPicture = y.Documents
                                          .Where(doc => doc.ProfileId.Equals(z.ProfileId))
-                                         .Select(doc => new Cover() { ProfileImage = host + doc.Name })
+                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
                                          .FirstOrDefault(),
 
                          PostID = z.PostId,

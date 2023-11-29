@@ -223,7 +223,7 @@ namespace CUConnect.Logic
                     .Select(x => new
                     {
                         profiles = x,
-                        data = x.Posts.Where(i=>i.ProfileId.Equals(profileId))
+                        data = x.Posts.Where(i => i.ProfileId.Equals(profileId))
                                       .Select(y => y.Profile)  // filter subscription node for:id
                     })
                     .SelectMany(z => z.profiles.Posts.Where(i => z.data.Any(c => c == i.Profile)), (y, z) => new PostViewRES()
