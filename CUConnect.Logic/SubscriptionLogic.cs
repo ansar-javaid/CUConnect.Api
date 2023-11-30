@@ -157,7 +157,7 @@ namespace CUConnect.Logic
             var host = $"{request.Scheme}://{request.Host}/files/";
 
 
-            var pageSize = 3;
+            var pageSize = 6;
             using (var _dbContext = new CUConnectDBContext())
             {
                 var profileQuery = _dbContext.Profiles
@@ -216,7 +216,7 @@ namespace CUConnect.Logic
             var host = $"{request.Scheme}://{request.Host}/files/";
 
 
-            var pageSize = 3;
+            var pageSize = 6;
             using (var _dbContext = new CUConnectDBContext())
             {
                 var profileQuery = _dbContext.Profiles
