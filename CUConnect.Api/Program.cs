@@ -40,7 +40,7 @@ builder.Services.AddScoped<ISubscriptionREPO, SubscriptionLogic>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 #region Swager UI
 builder.Services.AddSwaggerGen(options =>
@@ -100,7 +100,6 @@ builder.Services.AddCors(options =>
 
 
 builder.Services.AddDirectoryBrowser();
-builder.Services.AddResponseCompression(options => { options.EnableForHttps = true; });
 builder.Services.AddResponseCaching();
 
 //JWT Configuration
@@ -157,7 +156,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseResponseCaching();
-app.UseResponseCompression();
 
 app.UseHttpsRedirection();
 app.UseCors("EnableCORS");
