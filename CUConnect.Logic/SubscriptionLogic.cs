@@ -195,6 +195,8 @@ namespace CUConnect.Logic
                 // Apply pagination
                 var paginatedProfile = await profileQuery.Skip((page - 1) * pageSize)
                                                         .Take(pageSize)
+                                                        .OrderByDescending(r => r.TotalReactions)
+                                                        .ThenByDescending(r => r.PostID)
                                                         .ToListAsync();
 
                 return paginatedProfile;
@@ -250,6 +252,8 @@ namespace CUConnect.Logic
                 // Apply pagination
                 var paginatedProfile = await profileQuery.Skip((page - 1) * pageSize)
                                                         .Take(pageSize)
+                                                        .OrderByDescending(r => r.TotalReactions)
+                                                        .ThenByDescending(r => r.PostID)
                                                         .ToListAsync();
 
                 return paginatedProfile;
