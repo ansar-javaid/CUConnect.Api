@@ -175,6 +175,7 @@ namespace CUConnect.Logic
                     {
                         ProfileID = y.profiles.ProfileId,
                         ProfileTitle = y.profiles.Title,
+                        ProfileDescription = y.profiles.Description,
                         CoverPicture = y.profiles.Documents
                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
@@ -232,6 +233,7 @@ namespace CUConnect.Logic
                     {
                         ProfileID = y.profiles.ProfileId,
                         ProfileTitle = y.profiles.Title,
+                        ProfileDescription=null,
                         CoverPicture = y.profiles.Documents
                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
                                         .Select(doc => new Cover() { ProfileImage = doc.Path })

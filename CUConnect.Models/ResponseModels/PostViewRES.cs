@@ -5,6 +5,7 @@
         public int ProfileID { get; set; }
 
         public string? ProfileTitle { get; set; }
+        public string? ProfileDescription { get; set; }
 
         public Cover? CoverPicture { get; set; }
 
