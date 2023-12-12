@@ -157,7 +157,7 @@ namespace CUConnect.Logic
             var host = $"{request.Scheme}://{request.Host}/files/";
 
 
-            var pageSize = 3;
+            var pageSize = 6;
             using (var _dbContext = new CUConnectDBContext())
             {
                 var profileQuery = _dbContext.Profiles
@@ -175,6 +175,7 @@ namespace CUConnect.Logic
                     {
                         ProfileID = y.profiles.ProfileId,
                         ProfileTitle = y.profiles.Title,
+                        ProfileDescription = y.profiles.Description,
                         CoverPicture = y.profiles.Documents
                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
@@ -195,6 +196,8 @@ namespace CUConnect.Logic
                 // Apply pagination
                 var paginatedProfile = await profileQuery.Skip((page - 1) * pageSize)
                                                         .Take(pageSize)
+                                                        .OrderByDescending(r => r.TotalReactions)
+                                                        .ThenByDescending(r => r.PostID)
                                                         .ToListAsync();
 
                 return paginatedProfile;
@@ -214,7 +217,7 @@ namespace CUConnect.Logic
             var host = $"{request.Scheme}://{request.Host}/files/";
 
 
-            var pageSize = 3;
+            var pageSize = 6;
             using (var _dbContext = new CUConnectDBContext())
             {
                 var profileQuery = _dbContext.Profiles
@@ -230,6 +233,7 @@ namespace CUConnect.Logic
                     {
                         ProfileID = y.profiles.ProfileId,
                         ProfileTitle = y.profiles.Title,
+                        ProfileDescription = y.profiles.Description,
                         CoverPicture = y.profiles.Documents
                                         .Where(doc => doc.ProfileId.Equals(z.ProfileId))
                                         .Select(doc => new Cover() { ProfileImage = doc.Path })
@@ -250,6 +254,8 @@ namespace CUConnect.Logic
                 // Apply pagination
                 var paginatedProfile = await profileQuery.Skip((page - 1) * pageSize)
                                                         .Take(pageSize)
+                                                        .OrderByDescending(r => r.TotalReactions)
+                                                        .ThenByDescending(r => r.PostID)
                                                         .ToListAsync();
 
                 return paginatedProfile;
