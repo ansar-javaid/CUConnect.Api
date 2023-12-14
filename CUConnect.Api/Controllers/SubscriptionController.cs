@@ -1,8 +1,6 @@
-﻿using CUConnect.Models;
-using CUConnect.Models.Repository;
+﻿using CUConnect.Models.Repository;
 using CUConnect.Models.RequestModels;
 using CUConnect.Models.ResponseModels;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -78,15 +76,15 @@ namespace CUConnect.Api.Controllers
 
 
         /// <summary>
-        /// Returns all the posts of subscribed profiles for a user, which user has subscribed/following. Pass the page number for Data pagination
+        /// Returns all the posts of all profiles for a user, with reactions and their status. Pass the page number for Data pagination
         /// </summary>
         /// <param name="Email"></param>
         /// <param name="page"></param>
         /// <returns></returns>
-        [HttpGet, Route("SubscribedPosts")]
-        public async Task<ActionResult<ProfileViewRES>> SubscribedPosts([FromQuery][EmailAddress] string Email,[FromQuery] int page)
+        [HttpGet, Route("NewsFeedPosts")]
+        public async Task<ActionResult<ProfileViewRES>> NewsFeedPosts([FromQuery][EmailAddress] string Email, [FromQuery] int page)
         {
-            var result = await _subscription.GetSubscribedPosts(Email,page);
+            var result = await _subscription.GetNewsFeedPosts(Email, page);
             return Ok(result);
         }
 
