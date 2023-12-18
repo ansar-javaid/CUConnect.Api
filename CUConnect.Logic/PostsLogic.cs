@@ -78,6 +78,30 @@ namespace CUConnect.Logic
                 var post = await _dbContext.Posts.FindAsync(postId);
                 if (post == null)
                     return StatusCode(StatusCodes.Status404NotFound, new { Status = "Post with associated Id not found!" });
+
+                // Load the list of related Multiple Documents of one Post
+                var documents = await _dbContext.Documents
+                                     .Where(x => x.PostsId == post.PostId)
+                                     .ToListAsync();
+                // Load the list of related Multiple Reactions of one Post
+                var reactions = await _dbContext.Reactions
+                                     .Where(x => x.PostsId == post.PostId)
+                                     .ToListAsync();
+
+                // Remove all the Documets Related to the a single Project
+                _dbContext.Documents.RemoveRange(documents);
+                // Remove all the Reactions Related to the a single Project
+                _dbContext.Reactions.RemoveRange(reactions);
+
+                //Re-Select the Documents for their names to delete physical file from Fire Base Storage
+                var files = await _dbContext.Documents
+                    .Where(b => b.PostsId.Equals(post.PostId))
+                    .Select(files => files.Name)
+                    .ToListAsync();
+
+                // Pass the names to delete method
+                await _fileUploadLogic.DeleteFiles(files);
+
                 _dbContext.Posts.Remove(post);
                 await _dbContext.SaveChangesAsync();
                 return StatusCode(StatusCodes.Status200OK, new { Status = "Post Deleted!" });

@@ -50,13 +50,21 @@ namespace CUConnect.Logic
         {
             using (var _dbContext = new CUConnectDBContext())
             {
-                var department = new Department()
+                var existingDepartment = await _dbContext.Departments.ToListAsync();
+                var result = existingDepartment.Where(x => string.Equals(x.Name, view.Name, StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefault();
+
+                if (result == null)
                 {
-                    Name = view.Name
-                };
-                _dbContext.Departments.Add(department);
-                await _dbContext.SaveChangesAsync();
-                return Ok("Department Created");
+                    var department = new Department()
+                    {
+                        Name = view.Name
+                    };
+                    _dbContext.Departments.Add(department);
+                    await _dbContext.SaveChangesAsync();
+                    return StatusCode(StatusCodes.Status201Created, new { Message = "Department created!" });
+                }
+                return StatusCode(StatusCodes.Status400BadRequest, new { Message = "Department already exists!" });
             }
         }
         #endregion
@@ -175,7 +183,7 @@ namespace CUConnect.Logic
                                                 ProfileTitle = d.Title,
                                             }).First(),
                                             Email = u.Email,
-                                            Name = u.FirstName +" "+ u.LastName,
+                                            Name = u.FirstName + " " + u.LastName,
                                             UserRole = u.AspNetUserClaims.FirstOrDefault(c => c.ClaimValue.Equals(nameof(Roles.Admin))).ClaimValue //for Admin
                                         })
                                         .ToListAsync();

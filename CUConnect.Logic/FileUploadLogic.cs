@@ -236,6 +236,42 @@ namespace CUConnect.Logic
         }
         #endregion
 
+        #region Delete Files from Fire Storage
+        public async Task<bool> DeleteFiles(List<string> fileNames)
+        {
+            try
+            {
+                var auth = new FirebaseAuthProvider(new FirebaseConfig(_ApiKey));
+                var a = await auth.SignInWithEmailAndPasswordAsync(_AuthEmail, _AuthPassword);
+
+                var storage = new FirebaseStorage(
+                    _Bucket,
+                    new FirebaseStorageOptions
+                    {
+                        AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
+                    });
+
+                foreach (var fileName in fileNames)
+                {
+                    // Specify the path to the file you want to delete in the Firebase Storage bucket
+                    var path = $"{fileName}";
+
+                    // Delete the file
+                    await storage.Child(path).DeleteAsync();
+                }
+
+                return true; // Deletion successful
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return false;
+        }
+        #endregion
+
+
+
         public Task<(bool status, double size)> Upload(IFormFile file, Profile profile)
         {
             double size = 0;
@@ -246,8 +282,6 @@ namespace CUConnect.Logic
             SizeReducer(file, rootPath, null, profile).Wait();
             return Task.FromResult((true, size));
         }
-
-
-
     }
+
 }
