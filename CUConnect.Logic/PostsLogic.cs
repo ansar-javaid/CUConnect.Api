@@ -175,6 +175,36 @@ namespace CUConnect.Logic
         }
 
 
+        /// <summary>
+        /// PreLoading Images api call for frontend
+        /// </summary>
+        /// <returns></returns>
+        public async Task<ActionResult<ImagesViewRES>> LoadAllImages()
+        {
+            using (var _dbContext = new CUConnectDBContext())
+            {
+                var profileImages = await _dbContext.Documents
+                    .Where(d => d.ProfileId != null)
+                    .OrderByDescending(d => d.DocumentId) // Order by the most recent, assuming DocumentId is a timestamp or an incrementing identifier
+                    .Select(d => d.Path)
+                    .ToListAsync();
+
+                var files = await _dbContext.Documents
+                    .Where(d => d.PostsId != null)
+                    .OrderByDescending(d => d.DocumentId) // Order by the most recent, assuming DocumentId is a timestamp or an incrementing identifier
+                    .Select(d => d.Path)
+                    .ToListAsync();
+
+                return new ImagesViewRES
+                {
+                    ProfileImages = profileImages,
+                    Files = files
+                };
+            }
+
+        }
+
+
 
         private async Task<IActionResult> Send(NotificationRES notification)
         {

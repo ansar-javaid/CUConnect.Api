@@ -14,6 +14,7 @@ namespace CUConnect.Database.Entities
         }
 
         public virtual DbSet<AspNetRole> AspNetRoles { get; set; } = null!;
+        //public virtual DbSet<AspNetRoleAspNetUser> AspNetRoleAspNetUsers { get; set; } = null!;
         public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; } = null!;
         public virtual DbSet<AspNetUser> AspNetUsers { get; set; } = null!;
         public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
@@ -31,7 +32,6 @@ namespace CUConnect.Database.Entities
         public virtual DbSet<Tag> Tags { get; set; } = null!;
 
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AspNetRole>(entity =>
@@ -40,6 +40,11 @@ namespace CUConnect.Database.Entities
                     .IsUnique()
                     .HasFilter("([NormalizedName] IS NOT NULL)");
             });
+
+            //modelBuilder.Entity<AspNetRoleAspNetUser>(entity =>
+            //{
+            //    entity.HasKey(e => new { e.RoleId, e.UserId });
+            //});
 
             modelBuilder.Entity<AspNetUser>(entity =>
             {

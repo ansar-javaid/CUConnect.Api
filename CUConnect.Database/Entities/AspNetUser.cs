@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
@@ -45,6 +47,7 @@ namespace CUConnect.Database.Entities
         public DateTimeOffset? LockoutEnd { get; set; }
         public bool LockoutEnabled { get; set; }
         public int AccessFailedCount { get; set; }
+        public string? ExpoToken { get; set; }
 
         [InverseProperty("User")]
         public virtual ICollection<AspNetUserClaim> AspNetUserClaims { get; set; }

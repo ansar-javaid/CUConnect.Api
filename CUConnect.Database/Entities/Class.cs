@@ -1,8 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
+    [Index("DepartmentId", Name = "IX_Classes_DepartmentID")]
     public partial class Class
     {
         public Class()

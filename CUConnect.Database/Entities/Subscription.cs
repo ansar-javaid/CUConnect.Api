@@ -1,8 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
+    [Index("ProfileId", Name = "IX_Subscriptions_ProfileID")]
+    [Index("UserId", Name = "IX_Subscriptions_UserID")]
     public partial class Subscription
     {
         [Key]
@@ -11,7 +16,6 @@ namespace CUConnect.Database.Entities
         [Column("ProfileID")]
         public int ProfileId { get; set; }
         [Column("UserID")]
-        [StringLength(450)]
         public string UserId { get; set; } = null!;
 
         [ForeignKey("ProfileId")]

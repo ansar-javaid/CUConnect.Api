@@ -1,8 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
+    [Index("PostsId", Name = "IX_Documents_PostsID")]
+    [Index("ProfileId", Name = "IX_Documents_ProfileID")]
     public partial class Document
     {
         [Key]

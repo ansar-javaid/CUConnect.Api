@@ -89,6 +89,18 @@ namespace CUConnect.Api.Controllers
             return Ok(await _post.DeletePost(postId));
         }
 
+
+
+        /// <summary>
+        /// This is a test/beta method to load images in advance for frontend, for faster loading of images.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("LoadAllImages")]
+        public async Task<ActionResult<ImagesViewRES>> LoadAllImages()
+        {
+            return Ok(await _post.LoadAllImages());
+        }
+
         #endregion
     }
 }

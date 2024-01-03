@@ -1,9 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
     [Table("Profile")]
+    [Index("ClassId", Name = "IX_Profile_ClassID")]
+    [Index("DepartmentId", Name = "IX_Profile_DepartmentID")]
+    [Index("UserId", Name = "IX_Profile_UserID")]
     public partial class Profile
     {
         public Profile()
@@ -17,7 +23,6 @@ namespace CUConnect.Database.Entities
         [Column("ProfileID")]
         public int ProfileId { get; set; }
         [Column("UserID")]
-        [StringLength(450)]
         public string UserId { get; set; } = null!;
         [Column("DepartmentID")]
         public int? DepartmentId { get; set; }

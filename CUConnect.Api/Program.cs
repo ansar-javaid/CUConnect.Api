@@ -14,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddSignalR();
+builder.Services.AddHttpClient();
 //Sql Dependency Injection
 #region Database Contexts
 
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IAuthenticationREPO, AuthenticationLogic>();
 builder.Services.AddScoped<IProfileREPO, ProfileLogic>();
 builder.Services.AddScoped<IPostREPO, PostsLogic>();
 builder.Services.AddScoped<ISubscriptionREPO, SubscriptionLogic>();
+builder.Services.AddScoped<INotificationREPO, ExpoNotificationsLogic>();
 #endregion
 
 builder.Services.AddControllers();

@@ -17,7 +17,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.11")
+                .HasAnnotation("ProductVersion", "6.0.25")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -117,6 +117,9 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ExpoToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -272,7 +275,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("ClassId");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex(new[] { "DepartmentId" }, "IX_Classes_DepartmentID");
 
                     b.ToTable("Classes");
                 });
@@ -331,9 +334,9 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("DocumentId");
 
-                    b.HasIndex("PostsId");
+                    b.HasIndex(new[] { "PostsId" }, "IX_Documents_PostsID");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex(new[] { "ProfileId" }, "IX_Documents_ProfileID");
 
                     b.ToTable("Documents");
                 });
@@ -353,15 +356,14 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("EnrollmentId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex(new[] { "ClassId" }, "IX_Enrollments_ClassID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Enrollments_UserID");
 
                     b.ToTable("Enrollments");
                 });
@@ -388,7 +390,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("PostId");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex(new[] { "ProfileId" }, "IX_Posts_ProfileID");
 
                     b.ToTable("Posts");
                 });
@@ -412,9 +414,9 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("PostTagId");
 
-                    b.HasIndex("PostId");
+                    b.HasIndex(new[] { "PostId" }, "IX_PostTags_PostID");
 
-                    b.HasIndex("TagId");
+                    b.HasIndex(new[] { "TagId" }, "IX_PostTags_TagID");
 
                     b.ToTable("PostTags");
                 });
@@ -451,17 +453,16 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("ProfileId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex(new[] { "ClassId" }, "IX_Profile_ClassID");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex(new[] { "DepartmentId" }, "IX_Profile_DepartmentID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Profile_UserID");
 
                     b.ToTable("Profile");
                 });
@@ -481,15 +482,14 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("ReactionId");
 
-                    b.HasIndex("PostsId");
+                    b.HasIndex(new[] { "PostsId" }, "IX_Reactions_PostsID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Reactions_UserID");
 
                     b.ToTable("Reactions");
                 });
@@ -509,16 +509,15 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("SubscritionId")
                         .HasName("PK__Subscrip__94D8EB0A214B8F81");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex(new[] { "ProfileId" }, "IX_Subscriptions_ProfileID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Subscriptions_UserID");
 
                     b.ToTable("Subscriptions");
                 });

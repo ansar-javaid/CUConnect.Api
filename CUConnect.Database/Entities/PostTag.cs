@@ -1,8 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
+    [Index("PostId", Name = "IX_PostTags_PostID")]
+    [Index("TagId", Name = "IX_PostTags_TagID")]
     public partial class PostTag
     {
         [Key]
