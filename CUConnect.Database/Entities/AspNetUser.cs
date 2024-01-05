@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace CUConnect.Database.Entities
 {
@@ -23,9 +21,11 @@ namespace CUConnect.Database.Entities
 
         [Key]
         public string Id { get; set; } = null!;
-        [StringLength(10)]
+        [MaxLength(40)]
+        [MinLength(3)]
         public string FirstName { get; set; } = null!;
-        [StringLength(10)]
+        [MaxLength(40)]
+        [MinLength(3)]
         public string LastName { get; set; } = null!;
         public int Gender { get; set; }
         public DateTime UserJoined { get; set; }

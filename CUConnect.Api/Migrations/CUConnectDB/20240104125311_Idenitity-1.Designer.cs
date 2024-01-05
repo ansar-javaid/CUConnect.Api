@@ -12,14 +12,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CUConnect.Api.Migrations.CUConnectDB
 {
     [DbContext(typeof(CUConnectDBContext))]
-    [Migration("20230228121337_step2MainDatabase")]
-    partial class step2MainDatabase
+    [Migration("20240104125311_Idenitity-1")]
+    partial class Idenitity1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.11")
+                .HasAnnotation("ProductVersion", "6.0.25")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -120,18 +120,21 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("ExpoToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
                     b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -274,7 +277,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("ClassId");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex(new[] { "DepartmentId" }, "IX_Classes_DepartmentID");
 
                     b.ToTable("Classes");
                 });
@@ -333,9 +336,9 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("DocumentId");
 
-                    b.HasIndex("PostsId");
+                    b.HasIndex(new[] { "PostsId" }, "IX_Documents_PostsID");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex(new[] { "ProfileId" }, "IX_Documents_ProfileID");
 
                     b.ToTable("Documents");
                 });
@@ -355,15 +358,14 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("EnrollmentId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex(new[] { "ClassId" }, "IX_Enrollments_ClassID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Enrollments_UserID");
 
                     b.ToTable("Enrollments");
                 });
@@ -390,9 +392,35 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.HasKey("PostId");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex(new[] { "ProfileId" }, "IX_Posts_ProfileID");
 
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("CUConnect.Database.Entities.PostTag", b =>
+                {
+                    b.Property<int>("PostTagId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("PostTagID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PostTagId"), 1L, 1);
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int")
+                        .HasColumnName("PostID");
+
+                    b.Property<int>("TagId")
+                        .HasColumnType("int")
+                        .HasColumnName("TagID");
+
+                    b.HasKey("PostTagId");
+
+                    b.HasIndex(new[] { "PostId" }, "IX_PostTags_PostID");
+
+                    b.HasIndex(new[] { "TagId" }, "IX_PostTags_TagID");
+
+                    b.ToTable("PostTags");
                 });
 
             modelBuilder.Entity("CUConnect.Database.Entities.Profile", b =>
@@ -427,17 +455,16 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("ProfileId");
 
-                    b.HasIndex("ClassId");
+                    b.HasIndex(new[] { "ClassId" }, "IX_Profile_ClassID");
 
-                    b.HasIndex("DepartmentId");
+                    b.HasIndex(new[] { "DepartmentId" }, "IX_Profile_DepartmentID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Profile_UserID");
 
                     b.ToTable("Profile");
                 });
@@ -455,20 +482,16 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                         .HasColumnType("int")
                         .HasColumnName("PostsID");
 
-                    b.Property<int>("ReactinType")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("ReactionId");
 
-                    b.HasIndex("PostsId");
+                    b.HasIndex(new[] { "PostsId" }, "IX_Reactions_PostsID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Reactions_UserID");
 
                     b.ToTable("Reactions");
                 });
@@ -488,18 +511,35 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserID");
 
                     b.HasKey("SubscritionId")
                         .HasName("PK__Subscrip__94D8EB0A214B8F81");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex(new[] { "ProfileId" }, "IX_Subscriptions_ProfileID");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex(new[] { "UserId" }, "IX_Subscriptions_UserID");
 
                     b.ToTable("Subscriptions");
+                });
+
+            modelBuilder.Entity("CUConnect.Database.Entities.Tag", b =>
+                {
+                    b.Property<int>("TagId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("TagID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TagId"), 1L, 1);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TagId");
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("AspNetUserRole", b =>
@@ -619,6 +659,25 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                     b.Navigation("Profile");
                 });
 
+            modelBuilder.Entity("CUConnect.Database.Entities.PostTag", b =>
+                {
+                    b.HasOne("CUConnect.Database.Entities.Post", "Post")
+                        .WithMany("PostTags")
+                        .HasForeignKey("PostId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PostTags.PostID");
+
+                    b.HasOne("CUConnect.Database.Entities.Tag", "Tag")
+                        .WithMany("PostTags")
+                        .HasForeignKey("TagId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PostTags.TagID");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("Tag");
+                });
+
             modelBuilder.Entity("CUConnect.Database.Entities.Profile", b =>
                 {
                     b.HasOne("CUConnect.Database.Entities.Class", "Class")
@@ -722,6 +781,8 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 {
                     b.Navigation("Documents");
 
+                    b.Navigation("PostTags");
+
                     b.Navigation("Reactions");
                 });
 
@@ -732,6 +793,11 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                     b.Navigation("Posts");
 
                     b.Navigation("Subscriptions");
+                });
+
+            modelBuilder.Entity("CUConnect.Database.Entities.Tag", b =>
+                {
+                    b.Navigation("PostTags");
                 });
 #pragma warning restore 612, 618
         }

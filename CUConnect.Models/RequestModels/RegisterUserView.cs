@@ -6,13 +6,13 @@ namespace CUConnect.Models.RequestModels
     {
 
         [Required]
-        [MaxLength(10)]
+        [MaxLength(40)]
         [MinLength(3)]
         public string FirstName { get; set; }
 
 
         [Required]
-        [MaxLength(10)]
+        [MaxLength(40)]
         [MinLength(3)]
         public string LastName { get; set; }
 

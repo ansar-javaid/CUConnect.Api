@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace CUConnect.Api.Migrations.CUConnectDB
 {
-    public partial class allTables : Migration
+    public partial class Idenitity1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -39,8 +40,8 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false),
+                    FirstName = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
                     UserJoined = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -56,7 +57,8 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false),
+                    ExpoToken = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -74,6 +76,19 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Department", x => x.DepartmentID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    TagID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.TagID);
                 });
 
             migrationBuilder.CreateTable(
@@ -209,7 +224,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 {
                     EnrollmentID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ClassID = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -233,7 +248,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 {
                     ProfileID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DepartmentID = table.Column<int>(type: "int", nullable: true),
                     ClassID = table.Column<int>(type: "int", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
@@ -287,7 +302,7 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                     SubscritionID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProfileID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false)
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -333,14 +348,37 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 });
 
             migrationBuilder.CreateTable(
+                name: "PostTags",
+                columns: table => new
+                {
+                    PostTagID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TagID = table.Column<int>(type: "int", nullable: false),
+                    PostID = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PostTags", x => x.PostTagID);
+                    table.ForeignKey(
+                        name: "FK_PostTags.PostID",
+                        column: x => x.PostID,
+                        principalTable: "Posts",
+                        principalColumn: "PostID");
+                    table.ForeignKey(
+                        name: "FK_PostTags.TagID",
+                        column: x => x.TagID,
+                        principalTable: "Tags",
+                        principalColumn: "TagID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reactions",
                 columns: table => new
                 {
                     ReactionID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PostsID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
-                    ReactinType = table.Column<int>(type: "int", nullable: false)
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -427,6 +465,16 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 column: "ProfileID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_PostTags_PostID",
+                table: "PostTags",
+                column: "PostID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PostTags_TagID",
+                table: "PostTags",
+                column: "TagID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Profile_ClassID",
                 table: "Profile",
                 column: "ClassID");
@@ -489,6 +537,9 @@ namespace CUConnect.Api.Migrations.CUConnectDB
                 name: "Enrollments");
 
             migrationBuilder.DropTable(
+                name: "PostTags");
+
+            migrationBuilder.DropTable(
                 name: "Reactions");
 
             migrationBuilder.DropTable(
@@ -496,6 +547,9 @@ namespace CUConnect.Api.Migrations.CUConnectDB
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "Posts");

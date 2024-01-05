@@ -2,9 +2,9 @@
 
 #nullable disable
 
-namespace CUConnect.Api.Migrations.CUConnectDB
+namespace CUConnect.Api.Migrations
 {
-    public partial class step2MainDatabase : Migration
+    public partial class Idenitity1 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
